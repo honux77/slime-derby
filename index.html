@@ -2,7 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>SLIME DERBY</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -27,11 +29,15 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            padding: 0;
         }
         #app {
-            width: 100%; max-width: 960px;
-            height: 100vh; max-height: 720px;
+            width: 100vw;
+            height: 100vh;
             position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .screen {
             display: none; position: absolute;
@@ -39,6 +45,7 @@
             flex-direction: column;
             align-items: center; justify-content: center;
             padding: 20px;
+            overflow-y: auto;
         }
         .screen.active { display: flex; }
 
@@ -110,6 +117,8 @@
             border: 3px solid var(--white);
             cursor: pointer; text-transform: uppercase;
             outline: none; transition: all 0.1s;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         .btn:hover { background: var(--white); color: var(--bg); }
         .btn:active { transform: scale(0.95); }
@@ -240,11 +249,18 @@
         }
 
         /* ===== Game ===== */
-        #game-screen { padding: 0; }
+        #game-screen { 
+            padding: 0;
+            background: #000;
+        }
         #race-canvas {
-            width: 100%; height: 100%;
+            max-width: 100%;
+            max-height: 100vh;
+            width: auto;
+            height: auto;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
+            object-fit: contain;
         }
 
         /* ===== Results ===== */
@@ -285,7 +301,71 @@
             display: flex; gap: 8px; margin-left: auto;
         }
         .res-stats span { white-space: nowrap; }
-        .btn-group { display: flex; gap: 12px; margin-top: 8px; }
+        .btn-group { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+        .btn-mobile { display: none; }
+        .btn-full { display: inline; }
+
+        /* ===== Mobile Responsive ===== */
+        @media (max-width: 768px) {
+            .screen { padding: 10px; }
+            
+            .btn-mobile { display: inline; }
+            .btn-full { display: none; }
+            
+            #title-screen h1 {
+                font-size: 32px;
+            }
+            .subtitle { font-size: 8px; }
+            
+            #setup-screen { padding-top: 10px; gap: 8px; }
+            #setup-screen h2 { font-size: 14px; }
+            
+            .setup-row { flex-wrap: wrap; justify-content: center; }
+            .setup-label { min-width: auto; text-align: center; width: 100%; font-size: 8px; }
+            
+            .count-btn { width: 32px; height: 32px; font-size: 16px; }
+            #player-count, #time-input { font-size: 12px; padding: 8px; }
+            
+            .player-inputs { gap: 6px; }
+            .player-row { font-size: 8px; gap: 6px; }
+            .nes-input { font-size: 9px; padding: 6px; }
+            
+            .btn { padding: 10px 16px; font-size: 9px; }
+            .btn-group { gap: 8px; }
+            
+            .draw-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .draw-card { font-size: 9px; padding: 8px; }
+            
+            #result-screen { gap: 12px; padding: 10px; }
+            #result-screen h2 { font-size: 18px; }
+            
+            #finish-snapshot { max-width: 100%; }
+            
+            .results-list { max-width: 100%; }
+            .res-row { padding: 8px 10px; font-size: 8px; gap: 6px; }
+            .res-rank { min-width: 28px; font-size: 8px; }
+            .res-dot { width: 10px; height: 10px; }
+            .res-name { font-size: 9px; }
+            .res-time { min-width: 60px; font-size: 8px; }
+            .res-stats { font-size: 7px; gap: 4px; }
+        }
+
+        @media (max-width: 480px) {
+            #title-screen h1 { font-size: 24px; }
+            .subtitle { font-size: 7px; }
+            
+            .btn { padding: 8px 12px; font-size: 8px; }
+            
+            .setup-label { font-size: 7px; }
+            .count-btn { width: 28px; height: 28px; font-size: 14px; }
+            
+            .draw-card { font-size: 8px; padding: 6px; }
+            
+            .res-row { font-size: 7px; padding: 6px 8px; }
+            .res-rank { font-size: 7px; min-width: 24px; }
+            .res-name { font-size: 8px; }
+            .res-time { font-size: 7px; }
+        }
 
         @media (max-height: 500px) {
             #setup-screen { padding-top: 10px; gap: 6px; }
@@ -359,7 +439,7 @@
             Enjoyed the game? <a href="https://buymeacoffee.com/honux77o" target="_blank" style="color: #FFDD00; text-decoration: none; font-weight: bold;">☕ Buy me a coffee!</a>
         </div>
         <div class="btn-group">
-            <button class="btn" onclick="downloadResults()">📥 DOWNLOAD</button>
+            <button class="btn" onclick="downloadResults()"><span class="btn-full">📥 DOWNLOAD</span><span class="btn-mobile">📥</span></button>
             <button class="btn" onclick="showSetup()">SETUP</button>
             <button class="btn primary" onclick="startRace()">REMATCH</button>
         </div>
