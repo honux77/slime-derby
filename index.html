@@ -289,6 +289,14 @@
             object-fit: contain;
             transition: transform 0.15s ease-out;
         }
+        body:fullscreen #race-canvas,
+        body:-webkit-full-screen #race-canvas,
+        body:-moz-full-screen #race-canvas {
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
 
         /* ===== Results ===== */
         #result-screen { gap: 16px; }
@@ -398,10 +406,39 @@
             #setup-screen { padding-top: 10px; gap: 6px; }
             .btn { padding: 10px 20px; font-size: 10px; }
         }
+
+        /* ===== Fullscreen Button ===== */
+        #fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: var(--panel);
+            border: 3px solid var(--border);
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+        #fullscreen-btn:hover {
+            background: var(--surface);
+            border-color: var(--white);
+            transform: scale(1.1);
+        }
+        #fullscreen-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
 <div id="app">
+    <!-- Fullscreen Toggle Button -->
+    <button id="fullscreen-btn" onclick="toggleFullscreen()" title="풀스크린 토글">⛶</button>
+
     <!-- Title -->
     <div id="title-screen" class="screen active">
         <div class="title-slime-container">
@@ -1955,6 +1992,74 @@ function resetSetup() {
 
 // ── Init ──
 loadSetup();
+
+// ── Fullscreen ──
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+// Update fullscreen button icon and adjust canvas
+document.addEventListener('fullscreenchange', () => {
+    const btn = document.getElementById('fullscreen-btn');
+    if (document.fullscreenElement) {
+        btn.textContent = '⛶';
+        btn.title = '풀스크린 종료';
+        adjustCanvasForFullscreen(true);
+    } else {
+        btn.textContent = '⛶';
+        btn.title = '풀스크린 토글';
+        adjustCanvasForFullscreen(false);
+    }
+});
+
+// Adjust canvas size based on fullscreen state
+function adjustCanvasForFullscreen(isFullscreen) {
+    const raceCanvas = document.getElementById('race-canvas');
+    if (!raceCanvas) return;
+    
+    if (isFullscreen) {
+        // In fullscreen, scale canvas to fit screen while maintaining aspect ratio
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+        const canvasAspect = CW / CH;
+        const screenAspect = screenW / screenH;
+        
+        let scale;
+        if (screenAspect > canvasAspect) {
+            // Screen is wider - fit to height
+            scale = screenH / CH;
+        } else {
+            // Screen is taller - fit to width
+            scale = screenW / CW;
+        }
+        
+        raceCanvas.style.width = `${CW * scale}px`;
+        raceCanvas.style.height = `${CH * scale}px`;
+        
+        // Reset mobile transform if applied
+        if (isMobile) {
+            raceCanvas.style.transform = '';
+            raceCanvas.style.transformOrigin = '';
+        }
+    } else {
+        // Exit fullscreen - restore normal size
+        raceCanvas.style.width = '';
+        raceCanvas.style.height = '';
+        
+        // Reapply mobile transform if needed
+        if (isMobile && (state === 'racing' || state === 'countdown' || state === 'finished')) {
+            const scale = 2.0;
+            raceCanvas.style.transform = `scale(${scale}) translateX(${cameraX}px)`;
+            raceCanvas.style.transformOrigin = 'left center';
+        }
+    }
+}
 
 // ── Service Worker ──
 if ('serviceWorker' in navigator) {

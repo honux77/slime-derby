@@ -35,7 +35,7 @@
 
 ## 🚀 플레이하기
 
-👉 [게임 시작하기](https://honux77.github.io/slime-dirby/)
+👉 [게임 시작하기](https://honux77.github.io/slime-derby/)
 
 ## 🛠️ 기술 스택
 
