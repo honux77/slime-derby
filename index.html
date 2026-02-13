@@ -182,7 +182,7 @@
             align-items: center; justify-content: center;
         }
         .count-btn:hover { background: var(--white); color: var(--bg); }
-        #player-count, #time-input {
+        #player-count, #race-count, #time-input {
             font-family: 'Press Start 2P', monospace;
             font-size: 16px; width: 76px; text-align: center;
             background: var(--panel); color: var(--white);
@@ -191,6 +191,8 @@
         }
         #player-count::-webkit-inner-spin-button,
         #player-count::-webkit-outer-spin-button,
+        #race-count::-webkit-inner-spin-button,
+        #race-count::-webkit-outer-spin-button,
         #time-input::-webkit-inner-spin-button,
         #time-input::-webkit-outer-spin-button { -webkit-appearance: none; }
         #player-count:focus, #time-input:focus { border-color: var(--white); }
@@ -472,11 +474,25 @@
     <div id="setup-screen" class="screen">
         <h2>RACE SETUP</h2>
         <div class="setup-row">
-            <span class="setup-label">참가 슬라임</span>
+            <span class="setup-label">총 슬라임 수</span>
             <div class="count-controls">
                 <button class="count-btn" onclick="changeCount(-1)">-</button>
                 <input type="number" id="player-count" value="4" min="2" max="1000" oninput="setCount(this.value)">
                 <button class="count-btn" onclick="changeCount(1)">+</button>
+            </div>
+        </div>
+        <div class="setup-row">
+            <span class="setup-label">레이싱 참가 슬라임 수</span>
+            <div class="count-controls">
+                <button class="count-btn" onclick="changeRaceCount(-1)">-</button>
+                <input type="number" id="race-count" value="4" min="2" max="15" oninput="setRaceCount(this.value)">
+                <button class="count-btn" onclick="changeRaceCount(1)">+</button>
+            </div>
+        </div>
+        <div class="setup-row" id="draw-notice" style="display:none; margin-top:-8px; margin-bottom:4px;">
+            <span class="setup-label"></span>
+            <div style="font-size:9px; color:#ffdd00; line-height:1.5;">
+                ※ 랜덤 추첨 화면이 표시됩니다
             </div>
         </div>
         <div class="setup-row">
@@ -522,7 +538,7 @@
     <!-- Draw (selection) -->
     <div id="select-screen" class="screen">
         <h2>RANDOM DRAW</h2>
-        <p class="draw-sub">총 <span id="draw-total">0</span>명 중 <span style="color:var(--green)">8</span>명 선발!</p>
+        <p class="draw-sub">총 <span id="draw-total">0</span>명 중 <span id="draw-selected" style="color:var(--green)">0</span>명 선발!</p>
         <div class="draw-grid" id="draw-grid"></div>
         <button class="btn primary" onclick="beginRace()" style="margin-top:12px;font-size:14px">START RACE!</button>
     </div>
@@ -563,6 +579,13 @@ const SLIME_COLORS = [
     { hex: '#ff88cc', dark: '#bb5588', light: '#ffbbee' },
     { hex: '#ff8800', dark: '#bb5500', light: '#ffbb66' },
     { hex: '#44dddd', dark: '#228888', light: '#88ffee' },
+    { hex: '#88ff44', dark: '#55bb22', light: '#aaffaa' },  // Lime
+    { hex: '#ff44aa', dark: '#bb2277', light: '#ff88cc' },  // Hot Pink
+    { hex: '#ffaa44', dark: '#bb7722', light: '#ffcc88' },  // Orange Yellow
+    { hex: '#8844ff', dark: '#5522bb', light: '#aa88ff' },  // Purple Blue
+    { hex: '#44ffaa', dark: '#22bb77', light: '#88ffcc' },  // Mint
+    { hex: '#ff4488', dark: '#bb2255', light: '#ff88aa' },  // Rose
+    { hex: '#aaff44', dark: '#77bb22', light: '#ccff88' },  // Yellow Green
 ];
 const DEFAULT_NAMES = ['초록이','파랑이','빨강이','노랑이','보라','핑크','주황이','하늘이'];
 
@@ -590,6 +613,7 @@ const CROWD_H = 24;
 
 // ── State ──
 let playerCount = 4;
+let racePlayerCount = 4;  // Actual racers (2-15)
 let players = [];
 let targetTime = 10;
 let state = 'title';
@@ -785,9 +809,24 @@ function showSetup() {
 }
 
 // ── Setup UI ──
+function updateDrawNotice() {
+    const notice = document.getElementById('draw-notice');
+    if (playerCount > racePlayerCount) {
+        notice.style.display = 'flex';
+    } else {
+        notice.style.display = 'none';
+    }
+}
+
 function changeCount(d) {
     playerCount = Math.max(2, Math.min(1000, playerCount + d));
     document.getElementById('player-count').value = playerCount;
+    // Auto-adjust race count if needed
+    if (racePlayerCount > playerCount) {
+        racePlayerCount = playerCount;
+        document.getElementById('race-count').value = racePlayerCount;
+    }
+    updateDrawNotice();
     buildPlayerInputs();
     saveSetup();
     sfxTick();
@@ -796,7 +835,29 @@ function changeCount(d) {
 function setCount(val) {
     const n = parseInt(val);
     if (!isNaN(n)) playerCount = Math.max(2, Math.min(1000, n));
+    // Auto-adjust race count if needed
+    if (racePlayerCount > playerCount) {
+        racePlayerCount = playerCount;
+        document.getElementById('race-count').value = racePlayerCount;
+    }
+    updateDrawNotice();
     buildPlayerInputs();
+    saveSetup();
+}
+
+function changeRaceCount(d) {
+    racePlayerCount = Math.max(2, Math.min(15, Math.min(playerCount, racePlayerCount + d)));
+    document.getElementById('race-count').value = racePlayerCount;
+    updateDrawNotice();
+    saveSetup();
+    sfxTick();
+}
+
+function setRaceCount(val) {
+    const n = parseInt(val);
+    if (!isNaN(n)) racePlayerCount = Math.max(2, Math.min(15, Math.min(playerCount, n)));
+    document.getElementById('race-count').value = racePlayerCount;
+    updateDrawNotice();
     saveSetup();
 }
 
@@ -860,7 +921,7 @@ function buildPlayerInputs() {
 // ── Player factory ──
 function makePlayer(name, colorIdx) {
     return {
-        name, color: SLIME_COLORS[colorIdx],
+        name, color: SLIME_COLORS[colorIdx % SLIME_COLORS.length],  // Safe color index
         pos: 0, speed: 0,
         mult: 0.8 + Math.random() * 0.4,
         talent: 0.92 + Math.random() * 0.16,
@@ -886,6 +947,9 @@ function startRace() {
     playerCount = Math.max(2, Math.min(1000,
         parseInt(document.getElementById('player-count').value) || 4));
     document.getElementById('player-count').value = playerCount;
+    racePlayerCount = Math.max(2, Math.min(15, Math.min(playerCount,
+        parseInt(document.getElementById('race-count').value) || 4)));
+    document.getElementById('race-count').value = racePlayerCount;
     targetTime = Math.max(3, Math.min(60,
         parseInt(document.getElementById('time-input').value) || 10));
     const useNames = document.getElementById('use-names').checked;
@@ -901,21 +965,26 @@ function startRace() {
     }
 
     const nesMode = document.getElementById('use-nes-chars').checked;
-    const defaultNames = nesMode ? NES_CHARS.map(c => c.name) : DEFAULT_NAMES;
+    const defaultNames = DEFAULT_NAMES;
 
-    if (playerCount <= 8) {
+    // Select racers from total pool
+    if (playerCount === racePlayerCount) {
+        // All participate - no draw needed
         players = [];
         for (let i = 0; i < playerCount; i++) {
-            const name = nameMap[i] || defaultNames[i];
+            // Use entered name, or #number if NES mode, or default name
+            const name = nameMap[i] || (nesMode ? `#${i+1}` : (i < defaultNames.length ? defaultNames[i] : `#${i+1}`));
             players.push(makePlayer(name, i));
         }
         beginRace();
     } else {
-        const picked = pickRandom(playerCount, 8);
+        // Pick random racers from total pool
+        const picked = pickRandom(playerCount, racePlayerCount);
         players = [];
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < racePlayerCount; i++) {
             const num = picked[i];
-            const name = nameMap[num - 1] || ('#' + num);
+            // Use entered name, or #number if NES mode, or default name
+            const name = nameMap[num - 1] || (nesMode ? `#${num}` : (num - 1 < defaultNames.length ? defaultNames[num - 1] : `#${num}`));
             players.push(makePlayer(name, i));
         }
         showDraw(picked);
@@ -926,16 +995,19 @@ function showDraw(picked) {
     state = 'draw';
     showScreen('select-screen');
     document.getElementById('draw-total').textContent = playerCount;
+    document.getElementById('draw-selected').textContent = racePlayerCount;
     const grid = document.getElementById('draw-grid');
     grid.innerHTML = '';
-    for (let i = 0; i < picked.length; i++) {
+    // Display all picked racers
+    for (let i = 0; i < picked.length && i < racePlayerCount; i++) {
         const card = document.createElement('div');
         card.className = 'draw-card';
-        card.style.borderColor = SLIME_COLORS[i].hex;
+        const colorIdx = i % SLIME_COLORS.length;  // Safe color index
+        card.style.borderColor = SLIME_COLORS[colorIdx].hex;
         card.style.animationDelay = (i * 0.12) + 's';
         const label = players[i].name;
         card.innerHTML = `
-            <div class="draw-dot" style="background:${SLIME_COLORS[i].hex}"></div>
+            <div class="draw-dot" style="background:${SLIME_COLORS[colorIdx].hex}"></div>
             <span>${label}</span>`;
         grid.appendChild(card);
     }
@@ -1290,12 +1362,48 @@ function updateRace() {
 
     // Crowd cheering text
     if (!allDone) {
-        const cheerRate = elapsed / targetTime > 0.7 ? 0.08 : 0.04;  // Increased frequency (doubled)
+        const cheerRate = elapsed / targetTime > 0.7 ? 0.12 : 0.06;  // Further increased frequency
         if (Math.random() < cheerRate) {
-            const cheers = ['{n} 이겨라!','{n} 화이팅!','달려 {n}!','{n} 힘내!',
-                '가자 {n}!','{n}!!','빨리빨리!','우와~!','파이팅!','최고 {n}!'];
+            // Sort players by position to determine ranking
+            const sortedPlayers = [...players].sort((a, b) => b.pos - a.pos);
+            const totalPlayers = players.length;
+            
+            // Select player based on race situation
+            let rp, cheers;
+            const rand = Math.random();
+            
+            if (elapsed / targetTime < 0.3) {
+                // Early race - encourage everyone
+                rp = players[Math.floor(Math.random() * players.length)];
+                cheers = ['{n} 화이팅!', '가자 {n}!', '{n} 힘내!', '달려 {n}!', '좋아 {n}!'];
+            } else if (elapsed / targetTime > 0.85) {
+                // Near finish - focus on leader
+                rp = sortedPlayers[0];
+                cheers = ['{n} 거의 다 왔어!', '{n} 1등이다!', '{n} 우승이야!', '{n} 완주!!', 
+                         '{n} 대단해!', '{n} 최고!!', '축하해 {n}!'];
+            } else if (rand < 0.4) {
+                // 40% - Top performers (top 30%)
+                const topIndex = Math.floor(Math.random() * Math.ceil(totalPlayers * 0.3));
+                rp = sortedPlayers[topIndex];
+                cheers = ['{n} 선두다!', '{n} 잘한다!', '{n} 최고!', '멋져 {n}!', 
+                         '{n} 계속 가!', '{n} 대단해!', '완벽해 {n}!'];
+            } else if (rand < 0.7) {
+                // 30% - Bottom performers (bottom 30%)
+                const bottomIndex = Math.floor(totalPlayers * 0.7 + Math.random() * Math.ceil(totalPlayers * 0.3));
+                rp = sortedPlayers[Math.min(bottomIndex, totalPlayers - 1)];
+                cheers = ['{n} 힘내!', '{n} 아직이야!', '{n} 포기마!', '할수있어 {n}!', 
+                         '{n} 파이팅!', '{n} 달려!', '아자아자 {n}!', '{n} 역전하자!'];
+            } else {
+                // 30% - Mid pack
+                const midStart = Math.floor(totalPlayers * 0.3);
+                const midEnd = Math.floor(totalPlayers * 0.7);
+                const midIndex = midStart + Math.floor(Math.random() * (midEnd - midStart + 1));
+                rp = sortedPlayers[Math.min(midIndex, totalPlayers - 1)];
+                cheers = ['{n} 가자!', '{n} 화이팅!', '좋아 {n}!', '{n} 이겨라!', 
+                         '달려 {n}!', '{n} 올라가!'];
+            }
+            
             const cheerColors = ['#c92a2a','#087f5b','#c2255c','#5f3dc4','#1864ab','#0b7285','#2b8a3e','#d9480f'];
-            const rp = players[Math.floor(Math.random() * players.length)];
             const text = pick(cheers).replace('{n}', rp.name);
             const isTop = Math.random() > 0.5;
             particles.push({
@@ -1554,7 +1662,8 @@ function render() {
         const isWinner = finishOrder.length > 0 && finishOrder[0] === p;
         // Dim sleeping slimes
         if (p.fx === 'sleep') ctx.globalAlpha = 0.55;
-        if (useNESChars) {
+        if (useNESChars && i < 8) {
+            // First 8 racers show as unique NES characters
             drawNESChar(sx, sy + bY, sz, sqX, sqY, i, isWinner);
         } else {
             drawSlime(sx, sy + bY, sz, sqX, sqY, drawColor, isWinner);
@@ -1813,7 +1922,9 @@ function showResults() {
     const ranks = ['1ST','2ND','3RD','4TH','5TH','6TH','7TH','8TH'];
     const rcls = ['g','s','b','','','','',''];
 
-    for (let i = 0; i < finishOrder.length; i++) {
+    // Display only top 8 results
+    const displayCount = Math.min(finishOrder.length, 8);
+    for (let i = 0; i < displayCount; i++) {
         const p = finishOrder[i];
         const row = document.createElement('div');
         row.className = 'res-row' + (i===0?' w':'');
@@ -1889,7 +2000,9 @@ function downloadResults() {
     const ranks = ['1ST','2ND','3RD','4TH','5TH','6TH','7TH','8TH'];
     const rankColors = ['#ffd700','#c0c0c0','#cd7f32','#fff','#fff','#fff','#fff','#fff'];
     
-    for (let i = 0; i < finishOrder.length; i++) {
+    // Display only top 8 results
+    const displayCount = Math.min(finishOrder.length, 8);
+    for (let i = 0; i < displayCount; i++) {
         const p = finishOrder[i];
         const rowH = 50;
         const x = 50;
@@ -1973,6 +2086,7 @@ function saveSetup() {
     });
     const data = {
         count: playerCount,
+        raceCount: racePlayerCount,
         useNames: document.getElementById('use-names').checked,
         useNESChars: document.getElementById('use-nes-chars').checked,
         earlyFinish: document.getElementById('early-finish').checked,
@@ -1990,6 +2104,10 @@ function loadSetup() {
         if (d.count != null) {
             playerCount = Math.max(2, Math.min(1000, d.count));
             document.getElementById('player-count').value = playerCount;
+        }
+        if (d.raceCount != null) {
+            racePlayerCount = Math.max(2, Math.min(15, Math.min(playerCount, d.raceCount)));
+            document.getElementById('race-count').value = racePlayerCount;
         }
         if (d.useNames) {
             document.getElementById('use-names').checked = true;
@@ -2011,17 +2129,21 @@ function loadSetup() {
                 if (inp) inp.value = name;
             });
         }
+        updateDrawNotice();
     } catch(e) {}
 }
 
 function resetSetup() {
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
     playerCount = 4;
+    racePlayerCount = 4;
     document.getElementById('player-count').value = 4;
+    document.getElementById('race-count').value = 4;
     document.getElementById('use-names').checked = false;
     document.getElementById('use-nes-chars').checked = false;
     document.getElementById('early-finish').checked = true;
     document.getElementById('time-input').value = 10;
+    updateDrawNotice();
     buildPlayerInputs();
     sfxTick();
 }
