@@ -886,14 +886,6 @@ function buildPlayerInputs() {
     });
     box.innerHTML = '';
 
-    // Info banner for > 8
-    if (playerCount > 8) {
-        const info = document.createElement('div');
-        info.className = 'select-info';
-        info.innerHTML = `총 ${playerCount}명 중 8명이<br>랜덤으로 선발됩니다`;
-        box.appendChild(info);
-    }
-
     if (!useNames) return;
 
     // Name inputs
@@ -965,15 +957,14 @@ function startRace() {
     }
 
     const nesMode = document.getElementById('use-nes-chars').checked;
-    const defaultNames = DEFAULT_NAMES;
 
     // Select racers from total pool
     if (playerCount === racePlayerCount) {
         // All participate - no draw needed
         players = [];
         for (let i = 0; i < playerCount; i++) {
-            // Use entered name, or #number if NES mode, or default name
-            const name = nameMap[i] || (nesMode ? `#${i+1}` : (i < defaultNames.length ? defaultNames[i] : `#${i+1}`));
+            // Use entered name, or default to #number
+            const name = nameMap[i] || `#${i+1}`;
             players.push(makePlayer(name, i));
         }
         beginRace();
@@ -983,8 +974,8 @@ function startRace() {
         players = [];
         for (let i = 0; i < racePlayerCount; i++) {
             const num = picked[i];
-            // Use entered name, or #number if NES mode, or default name
-            const name = nameMap[num - 1] || (nesMode ? `#${num}` : (num - 1 < defaultNames.length ? defaultNames[num - 1] : `#${num}`));
+            // Use entered name, or default to #number
+            const name = nameMap[num - 1] || `#${num}`;
             players.push(makePlayer(name, i));
         }
         showDraw(picked);
