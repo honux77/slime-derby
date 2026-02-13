@@ -434,6 +434,13 @@
         #fullscreen-btn:active {
             transform: scale(0.95);
         }
+        
+        /* Hide fullscreen button on mobile */
+        @media (max-width: 768px) {
+            #fullscreen-btn {
+                display: none;
+            }
+        }
 
         /* ===== Visitor Counter ===== */
         .visitor-counter {
@@ -1499,10 +1506,9 @@ function updateMobileCamera() {
     // Max: 0 (Visual left edge aligned with Start area)
     const maxOffset = 0;
     
-    // Min: Stop when Finish Line (TRACK_R) touches Right Edge
-    // (TRACK_R * ratio + offset) * scale >= screenW 
-    // => offset >= (screenW / scale) - (TRACK_R * ratio)
-    const minOffset = (window.innerWidth / scale) - (TRACK_R * ratio);
+    // Min: Stop a bit past the Finish Line for more natural feel
+    // Allow camera to go 10px beyond finish line
+    const minOffset = (window.innerWidth / scale) - (TRACK_R * ratio) - 10;
     
     // Clamp
     let clamped = Math.max(minOffset, Math.min(maxOffset, targetOffset));
@@ -1564,20 +1570,26 @@ function render() {
     ctx.fillStyle = '#1a1a3a';
     ctx.fillRect(0, HEADER_H - 1, w, 1);
 
-    // Title
+    // Title (fixed position for mobile)
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity
     ctx.font = '12px "Press Start 2P"';
     ctx.fillStyle = '#58d854';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText('SLIME DERBY', 12, 16);
+    ctx.restore();
 
-    // Timer
+    // Timer (fixed position for mobile)
     if (state === 'racing' || state === 'finished') {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity for fixed position
+        
         const el = (performance.now() - raceStart) / 1000;
         ctx.font = '11px "Press Start 2P"';
         ctx.fillStyle = '#ffdd00';
         ctx.textAlign = 'right';
-        ctx.fillText('TIME ' + el.toFixed(1) + 's', w - 12, 16);
+        ctx.fillText('TIME ' + el.toFixed(1) + 's', CW - 12, 16);
 
         // Ranking bar
         const sorted = [...players].sort((a,b) => b.pos - a.pos);
@@ -1588,8 +1600,10 @@ function render() {
             ctx.fillStyle = sorted[i].color.hex;
             ctx.fillText(`${i+1}.${sorted[i].name}`, rx, 36);
             rx += ctx.measureText(`${i+1}.${sorted[i].name}`).width + 14;
-            if (rx > w - 60) break;
+            if (rx > CW - 60) break;
         }
+        
+        ctx.restore();
     }
 
     // Lane details (dividers, color bars, names)
@@ -1690,22 +1704,31 @@ function render() {
 
     // Countdown overlay
     if (state === 'countdown') {
+        // Save current transform
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity
+        
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
-        ctx.fillRect(0, 0, w, h);
+        ctx.fillRect(0, 0, CW, CH);
         ctx.font = '64px "Press Start 2P"';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         if (cdValue > 0) {
             ctx.fillStyle = '#ffdd00';
-            ctx.fillText(cdValue, w/2, h/2);
+            ctx.fillText(cdValue, CW/2, CH/2);
         } else {
             ctx.fillStyle = '#58d854';
-            ctx.fillText('GO!', w/2, h/2);
+            ctx.fillText('GO!', CW/2, CH/2);
         }
+        
+        ctx.restore();
     }
 
     // Finish overlay
     if (state === 'finished') {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity
+        
         const pulse = 0.8 + Math.sin(performance.now()/200) * 0.2;
         ctx.globalAlpha = pulse;
         ctx.font = '28px "Press Start 2P"';
@@ -1714,9 +1737,11 @@ function render() {
         ctx.fillStyle = '#ffd700';
         ctx.shadowColor = '#ffd700';
         ctx.shadowBlur = 16;
-        ctx.fillText('FINISH!', w/2, h/2);
+        ctx.fillText('FINISH!', CW/2, CH/2);
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
+        
+        ctx.restore();
     }
 
     // Text particles (crowd cheers) - drawn on top of slimes
