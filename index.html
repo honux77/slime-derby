@@ -1101,8 +1101,19 @@ function updateMobileCamera() {
     
     // Clamp camera to track bounds
     const minX = 0;  // Don't scroll past start
-    const maxX = -(TRACK_R * scale - window.innerWidth);  // Stop at finish line
-    cameraX = Math.max(maxX, Math.min(minX, cameraX));
+    // Stop when finish line (TRACK_R) appears on screen
+    // Finish line should be at right edge of viewport
+    const maxX = -(TRACK_R * scale - window.innerWidth);
+    
+    // Additional check: if finish line is visible, lock camera
+    const finishLineScreenX = (TRACK_R * scale) + cameraX;
+    if (finishLineScreenX <= window.innerWidth) {
+        // Finish line is visible, lock camera
+        cameraX = -(TRACK_R * scale - window.innerWidth);
+    } else {
+        // Normal clamping
+        cameraX = Math.max(maxX, Math.min(minX, cameraX));
+    }
     
     // Apply camera transform
     canvas.style.transform = `translateX(${cameraX}px) scale(${scale})`;
