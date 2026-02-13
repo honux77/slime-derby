@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Generate OG Image</title>
+</head>
+<body>
+<canvas id="canvas" width="1200" height="630"></canvas>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// Famicom color palette
+const BG = '#0f0f23';
+const PANEL = '#0a0a1a';
+const GREEN = '#58d854';
+const DARK_GREEN = '#1a5a1a';
+const BLUE = '#4488ff';
+const RED = '#ff4444';
+const YELLOW = '#ffdd00';
+const PURPLE = '#aa44ff';
+const PINK = '#ff88cc';
+const ORANGE = '#ff8800';
+const WHITE = '#fcfcfc';
+
+// Fill background
+ctx.fillStyle = BG;
+ctx.fillRect(0, 0, 1200, 630);
+
+// Draw pixelated stars
+ctx.fillStyle = WHITE;
+const stars = [
+    [120, 80], [250, 120], [380, 60], [520, 140], [680, 90],
+    [800, 70], [950, 130], [1100, 100], [180, 180], [420, 200],
+    [750, 180], [1050, 200], [300, 520], [600, 540], [900, 510],
+    [1120, 550], [150, 500], [450, 480]
+];
+stars.forEach(([x, y]) => {
+    ctx.fillRect(x, y, 4, 4);
+    ctx.fillRect(x-4, y, 4, 4);
+    ctx.fillRect(x+4, y, 4, 4);
+    ctx.fillRect(x, y-4, 4, 4);
+    ctx.fillRect(x, y+4, 4, 4);
+});
+
+// Title with pixel shadow
+ctx.font = 'bold 96px monospace';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+
+// Shadow
+ctx.fillStyle = DARK_GREEN;
+ctx.fillText('SLIME DERBY', 606, 126);
+
+// Main text
+ctx.fillStyle = GREEN;
+ctx.fillText('SLIME DERBY', 600, 120);
+
+// Subtitle
+ctx.font = 'bold 32px monospace';
+ctx.fillStyle = '#8888aa';
+ctx.fillText('귀여운 슬라임들의 레이싱 게임!', 600, 190);
+
+// Draw cute slimes on track
+function drawSlime(x, y, color, darkColor, size = 60) {
+    // Body (rounded rectangle)
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.ellipse(x, y, size, size * 0.75, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Eyes (white base) - moved up
+    ctx.fillStyle = WHITE;
+    ctx.beginPath();
+    ctx.arc(x - size * 0.25, y - size * 0.1, size * 0.18, 0, Math.PI * 2);
+    ctx.arc(x + size * 0.25, y - size * 0.1, size * 0.18, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Pupils (black dots)
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(x - size * 0.25, y - size * 0.1, size * 0.09, 0, Math.PI * 2);
+    ctx.arc(x + size * 0.25, y - size * 0.1, size * 0.09, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Mouth (thicker, reddish)
+    ctx.strokeStyle = '#ff6677';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(x, y + size * 0.2, size * 0.25, 0, Math.PI);
+    ctx.stroke();
+    
+    // Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(x, y + size * 0.9, size * 0.7, size * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// Race track
+const trackY = 380;
+const trackH = 200;
+ctx.fillStyle = PANEL;
+ctx.fillRect(100, trackY, 1000, trackH);
+
+// Track lanes
+ctx.strokeStyle = '#1a1a2e';
+ctx.lineWidth = 2;
+for (let i = 1; i < 4; i++) {
+    ctx.setLineDash([10, 10]);
+    ctx.beginPath();
+    ctx.moveTo(100, trackY + (trackH / 4) * i);
+    ctx.lineTo(1100, trackY + (trackH / 4) * i);
+    ctx.stroke();
+}
+ctx.setLineDash([]);
+
+// Finish line
+const finishX = 1050;
+ctx.fillStyle = WHITE;
+for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 2; j++) {
+        if ((i + j) % 2 === 0) {
+            ctx.fillRect(finishX + j * 20, trackY + i * 20, 20, 20);
+        }
+    }
+}
+ctx.fillStyle = '#000';
+for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 2; j++) {
+        if ((i + j) % 2 === 1) {
+            ctx.fillRect(finishX + j * 20, trackY + i * 20, 20, 20);
+        }
+    }
+}
+
+// Draw racing slimes
+drawSlime(200, trackY + 45, GREEN, DARK_GREEN, 40);
+drawSlime(350, trackY + 95, BLUE, '#2255bb', 40);
+drawSlime(500, trackY + 145, RED, '#bb2222', 40);
+drawSlime(280, trackY + 195, YELLOW, '#bb9900', 40);
+drawSlime(650, trackY + 95, PURPLE, '#7722bb', 40);
+drawSlime(800, trackY + 145, PINK, '#bb5588', 40);
+drawSlime(420, trackY + 45, ORANGE, '#bb5500', 40);
+
+// Motion lines
+ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+ctx.lineWidth = 2;
+const slimePositions = [
+    [200, trackY + 45], [350, trackY + 95], [500, trackY + 145],
+    [280, trackY + 195], [650, trackY + 95], [800, trackY + 145], [420, trackY + 45]
+];
+slimePositions.forEach(([x, y]) => {
+    for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x - 50 - i * 15, y - 10 + i * 10);
+        ctx.lineTo(x - 70 - i * 15, y - 10 + i * 10);
+        ctx.stroke();
+    }
+});
+
+// Footer URL
+ctx.font = 'bold 24px monospace';
+ctx.fillStyle = '#666677';
+ctx.textAlign = 'center';
+ctx.fillText('honux77.github.io/slime-derby', 600, 600);
+
+// Download
+const link = document.createElement('a');
+link.download = 'og-image.png';
+link.href = canvas.toDataURL('image/png');
+link.click();
+console.log('OG image generated!');
+</script>
+</body>
+</html>

@@ -432,6 +432,21 @@
         #fullscreen-btn:active {
             transform: scale(0.95);
         }
+
+        /* ===== Visitor Counter ===== */
+        .visitor-counter {
+            position: absolute;
+            bottom: 20px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .visitor-counter:hover {
+            opacity: 1;
+        }
+        .visitor-counter img {
+            height: 20px;
+            image-rendering: auto;
+        }
     </style>
 </head>
 <body>
@@ -448,6 +463,9 @@
         <h1>SLIME<br>DERBY</h1>
         <p class="subtitle">슬라임 경주로 순서를 정하자!</p>
         <button class="btn primary blink" onclick="showSetup()">PRESS START</button>
+        <div class="visitor-counter">
+            <img src="https://hits.sh/honux77.github.io/slime-derby.svg?label=Visitors&color=58d854&labelColor=0a0a1a" alt="Visitor Counter">
+        </div>
     </div>
 
     <!-- Setup -->
