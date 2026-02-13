@@ -7,7 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>SLIME DERBY</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f0f23">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="SLIME DERBY 🎮" />
     <meta property="og:description" content="귀여운 슬라임들의 레이싱 게임! 슬라임을 선택해서 경주에서 우승하세요 🏆" />
@@ -1727,6 +1730,11 @@ function resetSetup() {
 
 // ── Init ──
 loadSetup();
+
+// ── Service Worker ──
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+}
 </script>
 </body>
 </html>
