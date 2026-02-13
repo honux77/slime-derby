@@ -1061,33 +1061,44 @@ function updateRace() {
         sfxFanfare();
         setTimeout(showResults, 2200);
     }
+}
+
+// ── Update camera for mobile ──
+function updateMobileCamera() {
+    if (!isMobile || state !== 'racing') return;
     
-    // Update camera position for mobile (follow leader)
-    if (isMobile && state === 'racing') {
-        let leadPos = 0;
-        for (const p of players) {
-            if (!p.finished && p.pos > leadPos) {
-                leadPos = p.pos;
-            }
+    // Find the leader (highest position)
+    let leader = null;
+    let maxPos = -1;
+    for (const p of players) {
+        if (p.pos > maxPos) {
+            maxPos = p.pos;
+            leader = p;
         }
-        // Camera follows leader - keep leader at 1/3 from left edge
-        const scale = 2.0;  // Zoom level
-        const viewportWidth = window.innerWidth / scale;
-        const targetX = TRACK_L + leadPos - viewportWidth * 0.33;
-        const targetCameraX = -targetX * scale;
-        
-        // Smooth camera movement
-        cameraX += (targetCameraX - cameraX) * 0.15;
-        
-        // Clamp camera to track bounds
-        const minX = 0;
-        const maxX = -(CW * scale - window.innerWidth);
-        cameraX = Math.max(maxX, Math.min(minX, cameraX));
-        
-        // Apply camera transform
-        canvas.style.transform = `translateX(${cameraX}px) scale(${scale})`;
-        canvas.style.transformOrigin = 'left center';
     }
+    
+    if (!leader) return;
+    
+    // Camera settings
+    const scale = 2.0;  // Zoom level
+    const viewportWidth = window.innerWidth / scale;
+    
+    // Keep leader at 1/3 from left edge
+    const leaderScreenX = TRACK_L + leader.pos;
+    const targetX = leaderScreenX - viewportWidth * 0.33;
+    const targetCameraX = -targetX * scale;
+    
+    // Smooth camera movement
+    cameraX += (targetCameraX - cameraX) * 0.15;
+    
+    // Clamp camera to track bounds
+    const minX = 0;  // Don't scroll past start
+    const maxX = -(TRACK_R * scale - window.innerWidth);  // Stop at finish line
+    cameraX = Math.max(maxX, Math.min(minX, cameraX));
+    
+    // Apply camera transform
+    canvas.style.transform = `translateX(${cameraX}px) scale(${scale})`;
+    canvas.style.transformOrigin = 'left center';
 }
 
 // ── Hop animation curve ──
@@ -1126,6 +1137,11 @@ function getHopAnim(t, jumpH) {
 function render() {
     const w = CW, h = CH;
     ctx.clearRect(0, 0, w, h);
+    
+    // Reset camera during countdown for full view
+    if (isMobile && state === 'countdown' && canvas) {
+        canvas.style.transform = '';
+    }
 
     // Stadium background (grass, stands, spectators, fences, track)
     renderStadium();
@@ -1599,6 +1615,7 @@ function downloadResults() {
 // ── Game loop ──
 function loop() {
     updateRace();
+    updateMobileCamera();  // Update camera after race logic
     render();
     animId = requestAnimationFrame(loop);
 }
