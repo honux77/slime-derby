@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SLIME DERBY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f0f23;
+            --panel: #0a0a1a;
+            --surface: #141428;
+            --white: #fcfcfc;
+            --green: #58d854;
+            --yellow: #ffd700;
+            --gray: #888;
+            --border: #333;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: var(--bg);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #app {
+            width: 100%; max-width: 960px;
+            height: 100vh; max-height: 720px;
+            position: relative;
+        }
+        .screen {
+            display: none; position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .screen.active { display: flex; }
+
+        /* ===== Title ===== */
+        #title-screen h1 {
+            font-size: clamp(24px, 5vw, 40px);
+            color: var(--green);
+            text-shadow: 3px 3px 0 #1a5a1a, 6px 6px 0 rgba(0,0,0,0.4);
+            margin-bottom: 12px; text-align: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        #title-screen .subtitle {
+            font-size: clamp(8px, 1.8vw, 12px);
+            color: var(--gray); margin-bottom: 40px;
+        }
+        @keyframes pulse {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        .title-slime-container {
+            position: relative; width: 100px; height: 90px;
+            margin-bottom: 30px;
+        }
+        .title-slime {
+            width: 80px; height: 60px;
+            background: var(--green);
+            border-radius: 50% 50% 42% 42%;
+            position: absolute; bottom: 10px; left: 10px;
+            animation: slimeBounce 0.7s ease-in-out infinite;
+        }
+        .title-slime::before {
+            content: ''; position: absolute;
+            width: 12px; height: 16px;
+            background: white; border-radius: 50%;
+            top: 14px; left: 18px;
+            box-shadow: 26px 0 0 0 white;
+        }
+        .title-slime::after {
+            content: ''; position: absolute;
+            width: 7px; height: 10px;
+            background: var(--bg); border-radius: 50%;
+            top: 16px; left: 22px;
+            box-shadow: 26px 0 0 0 var(--bg);
+        }
+        .title-shadow {
+            position: absolute; bottom: 0; left: 10px;
+            width: 80px; height: 12px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 50%;
+            animation: shadowPulse 0.7s ease-in-out infinite;
+        }
+        @keyframes slimeBounce {
+            0%,100% { transform: translateY(0) scaleX(1) scaleY(1); }
+            20% { transform: translateY(-25px) scaleX(0.88) scaleY(1.12); }
+            50% { transform: translateY(0) scaleX(1.14) scaleY(0.86); }
+            70% { transform: translateY(-8px) scaleX(0.95) scaleY(1.05); }
+        }
+        @keyframes shadowPulse {
+            0%,100% { transform: scaleX(1); opacity: 0.35; }
+            20% { transform: scaleX(0.7); opacity: 0.2; }
+            50% { transform: scaleX(1.1); opacity: 0.4; }
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px; padding: 14px 28px;
+            background: var(--panel); color: var(--white);
+            border: 3px solid var(--white);
+            cursor: pointer; text-transform: uppercase;
+            outline: none; transition: all 0.1s;
+        }
+        .btn:hover { background: var(--white); color: var(--bg); }
+        .btn:active { transform: scale(0.95); }
+        .btn.primary { border-color: var(--green); color: var(--green); }
+        .btn.primary:hover { background: var(--green); color: var(--bg); }
+        .blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* ===== Setup ===== */
+        #setup-screen {
+            justify-content: flex-start;
+            padding-top: 24px; gap: 12px;
+            overflow-y: auto;
+        }
+        #setup-screen h2 {
+            font-size: clamp(14px, 3vw, 20px);
+            color: var(--yellow);
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+            margin-bottom: 8px;
+        }
+        .setup-row {
+            display: flex; align-items: center;
+            gap: 12px; width: 100%; max-width: 480px;
+        }
+        .setup-label {
+            font-size: 9px; min-width: 100px; text-align: right;
+        }
+        .count-controls {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .count-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 18px; width: 36px; height: 36px;
+            background: var(--panel); color: var(--white);
+            border: 3px solid var(--white);
+            cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .count-btn:hover { background: var(--white); color: var(--bg); }
+        #player-count { font-size: 22px; min-width: 36px; text-align: center; }
+        .player-list {
+            width: 100%; max-width: 480px;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .player-row {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .color-dot {
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.5); flex-shrink: 0;
+        }
+        .player-num { font-size: 9px; min-width: 20px; }
+        .nes-input {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px; padding: 7px 10px;
+            background: #0a0a0a; color: var(--white);
+            border: 2px solid #444; outline: none;
+            flex: 1; max-width: 200px;
+        }
+        .nes-input:focus { border-color: var(--white); }
+        .time-input { width: 56px!important; max-width: 56px!important; text-align: center; }
+        .unit { font-size: 9px; color: var(--gray); }
+
+        /* ===== Game ===== */
+        #game-screen { padding: 0; }
+        #race-canvas {
+            width: 100%; height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* ===== Results ===== */
+        #result-screen { gap: 16px; }
+        #result-screen h2 {
+            font-size: clamp(16px, 3vw, 26px);
+            color: var(--yellow);
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+        }
+        .results-list {
+            width: 100%; max-width: 520px;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .res-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; background: var(--panel);
+            border: 2px solid var(--border); font-size: 10px;
+        }
+        .res-row.w { border-color: var(--yellow); background: rgba(255,215,0,0.06); }
+        .res-rank { min-width: 36px; font-weight: bold; }
+        .res-rank.g { color: #ffd700; }
+        .res-rank.s { color: #c0c0c0; }
+        .res-rank.b { color: #cd7f32; }
+        .res-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+        .res-name { flex: 1; }
+        .res-time { color: #aaa; min-width: 80px; text-align: right; }
+        .btn-group { display: flex; gap: 12px; margin-top: 8px; }
+
+        @media (max-height: 500px) {
+            #setup-screen { padding-top: 10px; gap: 6px; }
+            .btn { padding: 10px 20px; font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- Title -->
+    <div id="title-screen" class="screen active">
+        <div class="title-slime-container">
+            <div class="title-slime"></div>
+            <div class="title-shadow"></div>
+        </div>
+        <h1>SLIME<br>DERBY</h1>
+        <p class="subtitle">슬라임 경주로 순서를 정하자!</p>
+        <button class="btn primary blink" onclick="showSetup()">PRESS START</button>
+    </div>
+
+    <!-- Setup -->
+    <div id="setup-screen" class="screen">
+        <h2>RACE SETUP</h2>
+        <div class="setup-row">
+            <span class="setup-label">참가 슬라임</span>
+            <div class="count-controls">
+                <button class="count-btn" onclick="changeCount(-1)">-</button>
+                <span id="player-count">4</span>
+                <button class="count-btn" onclick="changeCount(1)">+</button>
+            </div>
+        </div>
+        <div class="player-list" id="player-list"></div>
+        <div class="setup-row">
+            <span class="setup-label">레이스 시간</span>
+            <input type="number" class="nes-input time-input" id="time-input" value="10" min="3" max="60">
+            <span class="unit">SEC</span>
+        </div>
+        <button class="btn primary" onclick="startRace()" style="margin-top:12px;font-size:14px">
+            START RACE!
+        </button>
+    </div>
+
+    <!-- Game -->
+    <div id="game-screen" class="screen">
+        <canvas id="race-canvas"></canvas>
+    </div>
+
+    <!-- Results -->
+    <div id="result-screen" class="screen">
+        <h2>FINISH!</h2>
+        <div class="results-list" id="results-list"></div>
+        <div class="btn-group">
+            <button class="btn" onclick="showSetup()">SETUP</button>
+            <button class="btn primary" onclick="startRace()">REMATCH</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* =========================================================
+   SLIME DERBY - NES-style slime racing game
+   ========================================================= */
+
+// ── Colors ──
+const SLIME_COLORS = [
+    { hex: '#58d854', dark: '#2e8a2c', light: '#8aff88' },
+    { hex: '#4488ff', dark: '#2255bb', light: '#88bbff' },
+    { hex: '#ff4444', dark: '#bb2222', light: '#ff8888' },
+    { hex: '#ffdd00', dark: '#bb9900', light: '#ffee88' },
+    { hex: '#aa44ff', dark: '#7722bb', light: '#cc88ff' },
+    { hex: '#ff88cc', dark: '#bb5588', light: '#ffbbee' },
+    { hex: '#ff8800', dark: '#bb5500', light: '#ffbb66' },
+    { hex: '#44dddd', dark: '#228888', light: '#88ffee' },
+];
+const DEFAULT_NAMES = ['초록이','파랑이','빨강이','노랑이','보라','핑크','주황이','하늘이'];
+
+// ── Canvas constants ──
+const CW = 800, CH = 480;
+const TRACK_L = 130, TRACK_R = CW - 30;
+const TRACK_LEN = TRACK_R - TRACK_L;
+const HEADER_H = 46;
+
+// ── State ──
+let playerCount = 4;
+let players = [];
+let targetTime = 10;
+let state = 'title';
+let canvas, ctx, animId;
+let raceStart = 0;
+let cdValue = 0;
+let cdTimer = null;
+let finishOrder = [];
+let pace = 1;
+let frame = 0;
+let particles = [];
+
+// ── Audio ──
+let audioCtx;
+function tone(freq, dur, type='square', vol=0.06) {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = type; o.frequency.value = freq;
+        g.gain.value = vol;
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + dur);
+    } catch(e) {}
+}
+function sfxTick() { tone(520, 0.12); }
+function sfxGo() { tone(1040, 0.25); }
+function sfxCross() { tone(780, 0.08); }
+function sfxFanfare() {
+    tone(523,.12); setTimeout(()=>tone(659,.12),120);
+    setTimeout(()=>tone(784,.12),240); setTimeout(()=>tone(1047,.35),380);
+}
+
+// ── Screen management ──
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+function showSetup() {
+    state = 'setup';
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    if (cdTimer) { clearTimeout(cdTimer); cdTimer = null; }
+    showScreen('setup-screen');
+    buildPlayerInputs();
+}
+
+// ── Setup UI ──
+function changeCount(d) {
+    playerCount = Math.max(2, Math.min(8, playerCount + d));
+    document.getElementById('player-count').textContent = playerCount;
+    buildPlayerInputs();
+    sfxTick();
+}
+
+function buildPlayerInputs() {
+    const box = document.getElementById('player-list');
+    // Remember existing names
+    const old = {};
+    box.querySelectorAll('input').forEach(inp => {
+        old[inp.dataset.idx] = inp.value;
+    });
+    box.innerHTML = '';
+    for (let i = 0; i < playerCount; i++) {
+        const row = document.createElement('div');
+        row.className = 'player-row';
+        row.innerHTML = `
+            <div class="color-dot" style="background:${SLIME_COLORS[i].hex}"></div>
+            <span class="player-num">${i+1}.</span>
+            <input class="nes-input" type="text" maxlength="8"
+                   data-idx="${i}" placeholder="${DEFAULT_NAMES[i]}"
+                   value="${old[i] !== undefined ? old[i] : ''}">`;
+        box.appendChild(row);
+    }
+}
+
+// ── Start race ──
+function startRace() {
+    const inputs = document.querySelectorAll('#player-list input');
+    players = [];
+    for (let i = 0; i < playerCount; i++) {
+        const name = (inputs[i]?.value.trim()) || DEFAULT_NAMES[i];
+        players.push({
+            name, color: SLIME_COLORS[i],
+            pos: 0, speed: 0,
+            mult: 0.8 + Math.random() * 0.4,
+            talent: 0.92 + Math.random() * 0.16,
+            changeTimer: 20 + Math.floor(Math.random() * 40),
+            nextChange: 0,
+            finished: false, finishTime: 0, rank: -1,
+            hopT: Math.random(),       // hop cycle phase 0-1
+            hopSpd: 0,                 // hop cycle speed (set during race)
+            wasAir: false,             // was airborne last frame
+            y: 0, laneTop: 0, laneH: 0,
+        });
+    }
+
+    targetTime = Math.max(3, Math.min(60,
+        parseInt(document.getElementById('time-input').value) || 10));
+
+    canvas = document.getElementById('race-canvas');
+    ctx = canvas.getContext('2d');
+    canvas.width = CW; canvas.height = CH;
+    ctx.imageSmoothingEnabled = false;
+
+    // Lane positions
+    const trackH = CH - HEADER_H - 6;
+    const laneH = trackH / playerCount;
+    for (let i = 0; i < players.length; i++) {
+        players[i].laneTop = HEADER_H + laneH * i;
+        players[i].laneH = laneH;
+        players[i].y = HEADER_H + laneH * i + laneH / 2;
+    }
+
+    finishOrder = []; pace = 1; frame = 0; particles = [];
+    showScreen('game-screen');
+
+    // Countdown
+    state = 'countdown'; cdValue = 3;
+    sfxTick();
+    const countDown = () => {
+        cdValue--;
+        if (cdValue > 0) { sfxTick(); cdTimer = setTimeout(countDown, 800); }
+        else {
+            sfxGo(); cdValue = 0;
+            cdTimer = setTimeout(() => {
+                state = 'racing';
+                raceStart = performance.now();
+            }, 400);
+        }
+    };
+    cdTimer = setTimeout(countDown, 800);
+
+    if (animId) cancelAnimationFrame(animId);
+    loop();
+}
+
+// ── Race update ──
+function updateRace() {
+    if (state !== 'racing') return;
+    frame++;
+    const elapsed = (performance.now() - raceStart) / 1000;
+    const baseSpd = TRACK_LEN / (targetTime * 60);
+
+    // Pace control
+    let maxProg = 0;
+    for (const p of players) {
+        if (!p.finished) maxProg = Math.max(maxProg, p.pos / TRACK_LEN);
+    }
+    const expected = Math.min(elapsed / targetTime, 0.98);
+    if (maxProg > 0.01) {
+        const target = expected / maxProg;
+        pace += (target - pace) * 0.015;
+        pace = Math.max(0.15, Math.min(4, pace));
+    }
+
+    let allDone = true;
+    const justFinished = [];
+
+    for (const p of players) {
+        if (p.finished) continue;
+        allDone = false;
+
+        // Speed variation
+        p.nextChange--;
+        if (p.nextChange <= 0) {
+            p.mult = 0.35 + Math.random() * 1.3;
+            p.nextChange = 25 + Math.floor(Math.random() * 80);
+        }
+
+        // Rubber band
+        const avg = players.reduce((s,q) => s + q.pos, 0) / players.length / TRACK_LEN;
+        const my = p.pos / TRACK_LEN;
+        const rubber = 1 + (avg - my) * 0.1;
+
+        const spd = baseSpd * p.mult * p.talent * pace * rubber;
+        const rawPos = p.pos + spd;
+        p.pos = Math.min(rawPos, TRACK_LEN);
+
+        // Hop animation — faster movement = faster hops
+        const prevT = p.hopT;
+        p.hopSpd = 0.008 + Math.min(0.035, spd * 0.022);
+        p.hopT = (p.hopT + p.hopSpd) % 1;
+        const isAir = p.hopT >= 0.10 && p.hopT < 0.55;
+        const justLanded = p.wasAir && !isAir && p.hopT >= 0.55;
+        p.wasAir = isAir;
+
+        // Landing dust burst
+        if (justLanded) {
+            for (let d = 0; d < 4; d++) {
+                particles.push({
+                    x: TRACK_L + p.pos + (Math.random()-0.5)*10,
+                    y: p.y + p.laneH * 0.18,
+                    vx: (Math.random()-0.5)*2.5, vy: -Math.random()*1.5,
+                    size: 2 + Math.random() * 2.5,
+                    life: 16, maxLife: 16,
+                    color: p.color.light, grav: false,
+                });
+            }
+        }
+        // Occasional trail dust while airborne
+        if (isAir && frame % 10 === 0) {
+            particles.push({
+                x: TRACK_L + p.pos - 8,
+                y: p.y + p.laneH * 0.15,
+                vx: -Math.random() * 1.2, vy: -Math.random() * 0.5,
+                size: 1.5 + Math.random() * 1.5,
+                life: 14, maxLife: 14,
+                color: p.color.light, grav: false,
+            });
+        }
+
+        // Finish check
+        if (p.pos >= TRACK_LEN) {
+            p.finished = true;
+            p.finishTime = elapsed;
+            justFinished.push({ p, over: rawPos - TRACK_LEN });
+        }
+    }
+
+    // Sort simultaneous finishers by overshoot
+    justFinished.sort((a, b) => b.over - a.over);
+    for (const jf of justFinished) {
+        jf.p.rank = finishOrder.length;
+        finishOrder.push(jf.p);
+        sfxCross();
+        // Celebration particles
+        for (let i = 0; i < 20; i++) {
+            particles.push({
+                x: TRACK_R, y: jf.p.y,
+                vx: (Math.random()-0.5)*6, vy: -Math.random()*5-1,
+                size: 2+Math.random()*3, life: 50, maxLife: 50,
+                color: ['#ffd700','#ff4444','#fff','#58d854',jf.p.color.hex][Math.floor(Math.random()*5)],
+                grav: true,
+            });
+        }
+    }
+
+    // Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const pt = particles[i];
+        pt.life--;
+        if (pt.grav) { pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.12; }
+        else { pt.x += pt.vx||0; pt.y += pt.vy||0; }
+        if (pt.life <= 0) particles.splice(i, 1);
+    }
+
+    if (allDone && state === 'racing') {
+        state = 'finished';
+        sfxFanfare();
+        setTimeout(showResults, 2200);
+    }
+}
+
+// ── Hop animation curve ──
+// t: 0→1 hop cycle, jumpH: max jump height in px
+// Returns { yOff (negative=up), sx, sy }
+function getHopAnim(t, jumpH) {
+    let yOff = 0, sx = 1, sy = 1;
+    if (t < 0.10) {
+        // Crouch — prepare to jump: squash down
+        const p = t / 0.10;
+        const ease = p * p; // ease-in
+        sx = 1 + 0.16 * ease;
+        sy = 1 - 0.16 * ease;
+        yOff = 2 * ease;
+    } else if (t < 0.55) {
+        // Airborne — parabolic arc, stretched body
+        const p = (t - 0.10) / 0.45;
+        const arc = Math.sin(p * Math.PI);
+        yOff = -jumpH * arc + 2 * (1 - p);
+        // Stretch vertically in the air
+        const stretchP = Math.sin(p * Math.PI); // peaks mid-air
+        sx = 1 - 0.14 * stretchP;   // narrower
+        sy = 1 + 0.18 * stretchP;   // taller
+    } else {
+        // Landing — pudding wobble (damped oscillation)
+        const p = (t - 0.55) / 0.45;
+        const wobble = Math.sin(p * Math.PI * 3.5) * Math.exp(-p * 3.8);
+        sx = 1 + wobble * 0.22;
+        sy = 1 - wobble * 0.22;
+        yOff = Math.abs(wobble) * 1.5;
+    }
+    return { yOff, sx, sy };
+}
+
+// ── Render ──
+function render() {
+    const w = CW, h = CH;
+    ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = '#0d1b2a';
+    ctx.fillRect(0, 0, w, h);
+
+    // Header bar
+    ctx.fillStyle = '#080818';
+    ctx.fillRect(0, 0, w, HEADER_H);
+    ctx.fillStyle = '#1a1a3a';
+    ctx.fillRect(0, HEADER_H - 1, w, 1);
+
+    // Title
+    ctx.font = '12px "Press Start 2P"';
+    ctx.fillStyle = '#58d854';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SLIME DERBY', 12, 16);
+
+    // Timer
+    if (state === 'racing' || state === 'finished') {
+        const el = (performance.now() - raceStart) / 1000;
+        ctx.font = '11px "Press Start 2P"';
+        ctx.fillStyle = '#ffdd00';
+        ctx.textAlign = 'right';
+        ctx.fillText('TIME ' + el.toFixed(1) + 's', w - 12, 16);
+
+        // Ranking bar
+        const sorted = [...players].sort((a,b) => b.pos - a.pos);
+        ctx.font = '7px "Press Start 2P"';
+        ctx.textAlign = 'left';
+        let rx = 12;
+        for (let i = 0; i < Math.min(sorted.length, 6); i++) {
+            ctx.fillStyle = sorted[i].color.hex;
+            ctx.fillText(`${i+1}.${sorted[i].name}`, rx, 36);
+            rx += ctx.measureText(`${i+1}.${sorted[i].name}`).width + 14;
+            if (rx > w - 60) break;
+        }
+    }
+
+    // Lanes
+    for (let i = 0; i < players.length; i++) {
+        const p = players[i];
+        // Background
+        ctx.fillStyle = i % 2 === 0 ? '#0f2235' : '#0d1b2a';
+        ctx.fillRect(0, p.laneTop, w, p.laneH);
+        // Divider
+        ctx.fillStyle = '#182a40';
+        ctx.fillRect(TRACK_L, p.laneTop + p.laneH - 1, w - TRACK_L, 1);
+        // Left color bar
+        ctx.fillStyle = p.color.hex;
+        ctx.fillRect(3, p.laneTop + 3, 4, p.laneH - 6);
+        // Name
+        const fontSize = Math.min(9, p.laneH * 0.22);
+        ctx.font = fontSize + 'px "Press Start 2P"';
+        ctx.fillStyle = '#ddd';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${i+1}.${p.name}`, 12, p.y);
+    }
+
+    // Start line
+    ctx.strokeStyle = '#ffffff44';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(TRACK_L, HEADER_H);
+    ctx.lineTo(TRACK_L, h);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Finish line (checkered)
+    const csz = Math.max(6, Math.floor(players[0]?.laneH / 5) || 8);
+    const flW = csz * 2;
+    for (let y = HEADER_H; y < h; y += csz) {
+        for (let x = 0; x < flW; x += csz) {
+            const dark = ((x/csz)+(Math.floor((y-HEADER_H)/csz))) % 2 === 0;
+            ctx.fillStyle = dark ? '#222' : '#ddd';
+            ctx.fillRect(TRACK_R - flW/2 + x, y,
+                Math.min(csz, flW - x), Math.min(csz, h - y));
+        }
+    }
+
+    // Particles (behind slimes)
+    for (const pt of particles) {
+        const a = pt.life / pt.maxLife;
+        ctx.globalAlpha = a * 0.7;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI*2);
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Slimes
+    for (let i = 0; i < players.length; i++) {
+        const p = players[i];
+        const sx = TRACK_L + p.pos;
+        const sy = p.y;
+        const sz = Math.min(18, p.laneH * 0.32);
+        const jumpH = sz * 1.8;
+        let bY, sqX, sqY;
+        if (p.finished) {
+            // Gentle idle wobble after finishing
+            const idle = Math.sin(performance.now() * 0.004 + i * 2);
+            bY = 0;
+            sqX = 1 + idle * 0.03;
+            sqY = 1 - idle * 0.03;
+        } else {
+            const hop = getHopAnim(p.hopT, jumpH);
+            bY = hop.yOff;
+            sqX = hop.sx;
+            sqY = hop.sy;
+        }
+        const isWinner = finishOrder.length > 0 && finishOrder[0] === p;
+        drawSlime(sx, sy + bY, sz, sqX, sqY, p.color, isWinner);
+    }
+
+    // Countdown overlay
+    if (state === 'countdown') {
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.font = '64px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        if (cdValue > 0) {
+            ctx.fillStyle = '#ffdd00';
+            ctx.fillText(cdValue, w/2, h/2);
+        } else {
+            ctx.fillStyle = '#58d854';
+            ctx.fillText('GO!', w/2, h/2);
+        }
+    }
+
+    // Finish overlay
+    if (state === 'finished') {
+        const pulse = 0.8 + Math.sin(performance.now()/200) * 0.2;
+        ctx.globalAlpha = pulse;
+        ctx.font = '28px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffd700';
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 16;
+        ctx.fillText('FINISH!', w/2, h/2);
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+    }
+
+    ctx.textBaseline = 'alphabetic';
+}
+
+// ── Draw slime ──
+function drawSlime(x, y, size, sx, sy, color, crown) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(sx, sy);
+
+    const rw = size, rh = size * 0.82;
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(0, rh * 0.55, rw * 0.75, rh * 0.14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Body
+    ctx.fillStyle = color.hex;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, rw, rh, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Outline
+    ctx.strokeStyle = color.dark;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, rw, rh, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.beginPath();
+    ctx.ellipse(-rw*0.28, -rh*0.32, rw*0.35, rh*0.28, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes
+    const eyeOff = rw * 0.32;
+    const eyeY = -rh * 0.08;
+    const eww = size * 0.2, ewh = size * 0.26;
+
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.ellipse(-eyeOff, eyeY, eww, ewh, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(eyeOff, eyeY, eww, ewh, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Pupils
+    const pp = eww * 0.22;
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.ellipse(-eyeOff+pp, eyeY, eww*0.52, ewh*0.62, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(eyeOff+pp, eyeY, eww*0.52, ewh*0.62, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Eye shine
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(-eyeOff+pp-eww*0.15, eyeY-ewh*0.25, eww*0.22, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(eyeOff+pp-eww*0.15, eyeY-ewh*0.25, eww*0.22, 0, Math.PI*2);
+    ctx.fill();
+
+    // Mouth
+    ctx.strokeStyle = color.dark;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(0, rh*0.2, size*0.15, 0.15, Math.PI-0.15);
+    ctx.stroke();
+
+    // Cheeks
+    ctx.fillStyle = 'rgba(255,120,120,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(-eyeOff-eww*0.4, eyeY+ewh*0.7, size*0.12, size*0.07, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(eyeOff+eww*0.4, eyeY+ewh*0.7, size*0.12, size*0.07, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Crown
+    if (crown) {
+        const cw = rw * 0.5, cy = -rh - cw * 0.5;
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath();
+        ctx.moveTo(-cw, cy+cw*0.5);
+        ctx.lineTo(-cw, cy);
+        ctx.lineTo(-cw*0.4, cy+cw*0.3);
+        ctx.lineTo(0, cy-cw*0.15);
+        ctx.lineTo(cw*0.4, cy+cw*0.3);
+        ctx.lineTo(cw, cy);
+        ctx.lineTo(cw, cy+cw*0.5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#b8860b';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+        // Gem
+        ctx.fillStyle = '#ff3333';
+        ctx.beginPath();
+        ctx.arc(0, cy+cw*0.18, cw*0.12, 0, Math.PI*2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+// ── Results ──
+function showResults() {
+    state = 'result';
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    showScreen('result-screen');
+
+    const box = document.getElementById('results-list');
+    box.innerHTML = '';
+    const ranks = ['1ST','2ND','3RD','4TH','5TH','6TH','7TH','8TH'];
+    const rcls = ['g','s','b','','','','',''];
+
+    for (let i = 0; i < finishOrder.length; i++) {
+        const p = finishOrder[i];
+        const row = document.createElement('div');
+        row.className = 'res-row' + (i===0?' w':'');
+        row.innerHTML = `
+            <span class="res-rank ${rcls[i]}">${ranks[i]}</span>
+            <div class="res-dot" style="background:${p.color.hex}"></div>
+            <span class="res-name">${p.name}</span>
+            <span class="res-time">${p.finishTime.toFixed(2)}s</span>`;
+        box.appendChild(row);
+    }
+}
+
+// ── Game loop ──
+function loop() {
+    updateRace();
+    render();
+    animId = requestAnimationFrame(loop);
+}
+
+// ── Init ──
+buildPlayerInputs();
+</script>
+</body>
+</html>
