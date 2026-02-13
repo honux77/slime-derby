@@ -662,7 +662,20 @@ function sfxFanfare() {
     tone(523,.12); setTimeout(()=>tone(659,.12),120);
     setTimeout(()=>tone(784,.12),240); setTimeout(()=>tone(1047,.35),380);
 }
-function sfxBoost() { tone(660,.06); setTimeout(()=>tone(880,.06),60); setTimeout(()=>tone(1100,.1),120); }
+function sfxBoost() { 
+    // Car vroom sound - sweep from low to high frequency
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'sawtooth'; // Sawtooth wave for richer car-like sound
+        o.frequency.value = 100; // Start low
+        o.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.4); // Sweep up longer
+        g.gain.value = 0.15;
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5); // Extended duration
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + 0.5);
+    } catch(e) {}
+}
 function sfxTrip() { tone(300,.08); setTimeout(()=>tone(180,.15,'sawtooth'),80); }
 function sfxSleep() { tone(220,.2,'sine',0.04); }
 
@@ -1108,6 +1121,7 @@ function spawnFxText(p, text, color) {
         vx: 0, vy: -0.6,
         size: 0, life: 50, maxLife: 50,
         color, grav: false, text,
+        isEffect: true,  // Mark as effect text (no speech bubble)
     });
 }
 
@@ -1291,6 +1305,7 @@ function updateRace() {
                 vy: isTop ? 0.2 : -0.2,  // Slower vertical movement toward track
                 size: 0, life: 120, maxLife: 120,  // Doubled lifetime (2 seconds at 60fps)
                 color: pick(cheerColors), grav: false, text,
+                isSpeechBubble: true,  // Mark as speech bubble
             });
         }
     }
@@ -1587,22 +1602,25 @@ function render() {
             ctx.font = `bold ${fs}px "Press Start 2P"`;
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             
-            // Measure text for bubble size
-            const metrics = ctx.measureText(pt.text);
-            const textW = metrics.width;
-            const textH = fs;
-            const padding = 4;
-            const bubbleW = textW + padding * 2;
-            const bubbleH = textH + padding * 2;
-            
-            // Draw speech bubble background
-            ctx.fillStyle = '#fff';
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.roundRect(pt.x - bubbleW/2, pt.y - bubbleH/2, bubbleW, bubbleH, 3);
-            ctx.fill();
-            ctx.stroke();
+            // Only draw speech bubble for crowd cheers
+            if (pt.isSpeechBubble) {
+                // Measure text for bubble size
+                const metrics = ctx.measureText(pt.text);
+                const textW = metrics.width;
+                const textH = fs;
+                const padding = 4;
+                const bubbleW = textW + padding * 2;
+                const bubbleH = textH + padding * 2;
+                
+                // Draw speech bubble background
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(pt.x - bubbleW/2, pt.y - bubbleH/2, bubbleW, bubbleH, 3);
+                ctx.fill();
+                ctx.stroke();
+            }
             
             // Draw text
             ctx.fillStyle = pt.color;
