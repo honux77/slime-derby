@@ -1276,7 +1276,7 @@ function updateRace() {
 
     // Crowd cheering text
     if (!allDone) {
-        const cheerRate = elapsed / targetTime > 0.7 ? 0.04 : 0.02;  // Much higher frequency
+        const cheerRate = elapsed / targetTime > 0.7 ? 0.08 : 0.04;  // Increased frequency (doubled)
         if (Math.random() < cheerRate) {
             const cheers = ['{n} 이겨라!','{n} 화이팅!','달려 {n}!','{n} 힘내!',
                 '가자 {n}!','{n}!!','빨리빨리!','우와~!','파이팅!','최고 {n}!'];
@@ -1583,7 +1583,7 @@ function render() {
         if (pt.text) {
             const a = pt.life / pt.maxLife;
             ctx.globalAlpha = a * 0.9;
-            const fs = pt.text.length > 5 ? 6 : pt.text.length > 2 ? 8 : 10;
+            const fs = pt.text.length > 5 ? 9 : pt.text.length > 2 ? 11 : 13;  // Increased font sizes
             ctx.font = `bold ${fs}px "Press Start 2P"`;
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             
