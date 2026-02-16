@@ -683,41 +683,7 @@ function drawNESChar(x, y, size, sx, sy, charIdx, crown, fx) {
     ctx.drawImage(img, -w / 2, -h + size * 0.3, w, h);
 
     // Effect overlay on character
-    if (crown) {
-        // Winner star eyes
-        const eyeY = -h * 0.65 + size * 0.3;
-        const eyeOff = size * 0.25;
-        
-        ctx.fillStyle = '#ffdd00';
-        ctx.strokeStyle = '#111';
-        ctx.lineWidth = 2;
-        const starSize = size * 0.35;
-        
-        ctx.save();
-        ctx.translate(-eyeOff, eyeY);
-        drawStar(0, 0, 5, starSize, starSize * 0.4);
-        ctx.restore();
-        
-        ctx.save();
-        ctx.translate(eyeOff, eyeY);
-        drawStar(0, 0, 5, starSize, starSize * 0.4);
-        ctx.restore();
-        
-        // Sparkles
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        const sparkles = [
-            {x: -eyeOff - starSize*1.2, y: eyeY - starSize*0.8, size: 3},
-            {x: -eyeOff + starSize*1.2, y: eyeY - starSize*0.5, size: 2.5},
-            {x: eyeOff - starSize*1.2, y: eyeY - starSize*0.8, size: 3},
-            {x: eyeOff + starSize*1.2, y: eyeY - starSize*0.5, size: 2.5},
-        ];
-        for (const sp of sparkles) {
-            ctx.beginPath();
-            ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        
-    } else if (fx === 'trip') {
+    if (fx === 'trip') {
         // X eyes overlay
         ctx.strokeStyle = '#ff0000';
         ctx.lineWidth = 3;
