@@ -601,10 +601,37 @@ function toggleLanguage() {
         startBtn.textContent = 'PRESS START';
     }
     
+    // Update setup screen labels
+    updateSetupLabels();
+    
     // Update draw notice
     const drawNoticeText = document.getElementById('draw-notice-text');
     if (drawNoticeText) {
         drawNoticeText.textContent = t('drawNotice');
+    }
+}
+
+function updateSetupLabels() {
+    const elements = {
+        'setup-title': 'setupTitle',
+        'label-total-players': 'totalPlayers',
+        'label-racing-players': 'racingPlayers',
+        'label-race-time': 'raceTime',
+        'label-use-names': 'useNames',
+        'label-early-finish': 'earlyFinishMode',
+        'btn-min-1': 'min',
+        'btn-max-1': 'max',
+        'btn-min-2': 'min',
+        'btn-max-2': 'max',
+        'btn-min-3': 'min',
+        'btn-max-3': 'max',
+        'btn-reset': 'reset',
+        'btn-start-race': 'startGame',
+    };
+    
+    for (const [id, key] of Object.entries(elements)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = t(key);
     }
 }
 
