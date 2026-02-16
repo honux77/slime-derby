@@ -1397,10 +1397,10 @@ function updateRace() {
                     size: 1.5, life: 14, maxLife: 14, color: '#ffff44', grav: false });
             }
         }
-        if (p.fx === 'sleep' && frame % 18 === 0) {
+        if (p.fx === 'sleep' && frame % 15 === 0) {
             particles.push({ x: px+6, y: py-12,
-                vx: 0.3+Math.random()*0.3, vy: -0.5-Math.random()*0.3,
-                size: 0, life: 35, maxLife: 35, color: '#88aaff', grav: false, text: 'z' });
+                vx: 0.3+Math.random()*0.3, vy: -0.6-Math.random()*0.4,
+                size: 0, life: 40, maxLife: 40, color: '#88aaff', grav: false, text: 'Z' });
         }
 
         // Rubber band
@@ -1835,13 +1835,46 @@ function render() {
             drawColor = { hex: p.color.hex + '99', dark: p.color.dark, light: p.color.light };
         }
         const isWinner = finishOrder.length > 0 && finishOrder[0] === p;
+        
+        // ── Manga effects (behind slime) ──
+        if (p.fx === 'boost') {
+            // Speed lines
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,221,0,0.5)';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            for (let l = 0; l < 5; l++) {
+                const len = 20 + Math.random() * 15;
+                const yOff = (Math.random() - 0.5) * sz * 1.5;
+                ctx.beginPath();
+                ctx.moveTo(sx - sz * 0.6, sy + bY + yOff);
+                ctx.lineTo(sx - sz * 0.6 - len, sy + bY + yOff);
+                ctx.stroke();
+            }
+            ctx.restore();
+        } else if (p.fx === 'trip' && p.fxTimer > 30) {
+            // Impact effect (stars/spirals around slime)
+            ctx.save();
+            ctx.fillStyle = '#ffdd00';
+            ctx.strokeStyle = '#ff4444';
+            ctx.lineWidth = 1.5;
+            const angles = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
+            for (const ang of angles) {
+                const dist = sz * 1.2;
+                const xx = sx + Math.cos(ang) * dist;
+                const yy = sy + bY + Math.sin(ang) * dist * 0.7;
+                drawStar(xx, yy, 4, sz * 0.15, sz * 0.06);
+            }
+            ctx.restore();
+        }
+        
         // Dim sleeping slimes
         if (p.fx === 'sleep') ctx.globalAlpha = 0.55;
         if (useNESChars && i < 8) {
             // First 8 racers show as unique NES characters
-            drawNESChar(sx, sy + bY, sz, sqX, sqY, i, isWinner);
+            drawNESChar(sx, sy + bY, sz, sqX, sqY, i, isWinner, p.fx);
         } else {
-            drawSlime(sx, sy + bY, sz, sqX, sqY, drawColor, isWinner);
+            drawSlime(sx, sy + bY, sz, sqX, sqY, drawColor, isWinner, p.fx);
         }
         if (p.fx === 'sleep') ctx.globalAlpha = 1;
     }
@@ -1913,7 +1946,8 @@ function render() {
         if (pt.text) {
             const a = pt.life / pt.maxLife;
             ctx.globalAlpha = a * 0.9;
-            const fs = pt.text.length > 5 ? 9 : pt.text.length > 2 ? 11 : 13;  // Increased font sizes
+            // Larger font for single character Z
+            const fs = pt.text === 'Z' ? 16 : pt.text.length > 5 ? 9 : pt.text.length > 2 ? 11 : 13;
             ctx.font = `bold ${fs}px "Press Start 2P"`;
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             
@@ -1947,8 +1981,34 @@ function render() {
     ctx.textBaseline = 'alphabetic';
 }
 
+// ── Helper: Draw star ──
+function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+    let rot = Math.PI / 2 * 3;
+    let x = cx;
+    let y = cy;
+    const step = Math.PI / spikes;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerRadius);
+    for (let i = 0; i < spikes; i++) {
+        x = cx + Math.cos(rot) * outerRadius;
+        y = cy + Math.sin(rot) * outerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+
+        x = cx + Math.cos(rot) * innerRadius;
+        y = cy + Math.sin(rot) * innerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+    }
+    ctx.lineTo(cx, cy - outerRadius);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+}
+
 // ── Draw slime ──
-function drawSlime(x, y, size, sx, sy, color, crown) {
+function drawSlime(x, y, size, sx, sy, color, crown, fx) {
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(sx, sy);
@@ -1980,37 +2040,91 @@ function drawSlime(x, y, size, sx, sy, color, crown) {
     ctx.ellipse(-rw*0.28, -rh*0.32, rw*0.35, rh*0.28, -0.4, 0, Math.PI * 2);
     ctx.fill();
 
-    // Eyes
+    // Eyes (effect-dependent)
     const eyeOff = rw * 0.32;
     const eyeY = -rh * 0.08;
     const eww = size * 0.2, ewh = size * 0.26;
 
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.ellipse(-eyeOff, eyeY, eww, ewh, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(eyeOff, eyeY, eww, ewh, 0, 0, Math.PI*2);
-    ctx.fill();
+    if (fx === 'trip') {
+        // X eyes
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        const xs = eww * 0.7;
+        // Left eye X
+        ctx.beginPath();
+        ctx.moveTo(-eyeOff - xs, eyeY - xs);
+        ctx.lineTo(-eyeOff + xs, eyeY + xs);
+        ctx.moveTo(-eyeOff - xs, eyeY + xs);
+        ctx.lineTo(-eyeOff + xs, eyeY - xs);
+        ctx.stroke();
+        // Right eye X
+        ctx.beginPath();
+        ctx.moveTo(eyeOff - xs, eyeY - xs);
+        ctx.lineTo(eyeOff + xs, eyeY + xs);
+        ctx.moveTo(eyeOff - xs, eyeY + xs);
+        ctx.lineTo(eyeOff + xs, eyeY - xs);
+        ctx.stroke();
+    } else if (fx === 'sleep') {
+        // Closed eyes (horizontal lines)
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-eyeOff - eww*0.7, eyeY);
+        ctx.lineTo(-eyeOff + eww*0.7, eyeY);
+        ctx.moveTo(eyeOff - eww*0.7, eyeY);
+        ctx.lineTo(eyeOff + eww*0.7, eyeY);
+        ctx.stroke();
+    } else if (fx === 'boost') {
+        // > < eyes (determined/focused expression)
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        const ew = eww * 0.8;
+        const eh = ewh * 0.6;
+        // Left eye >
+        ctx.beginPath();
+        ctx.moveTo(-eyeOff - ew, eyeY - eh);
+        ctx.lineTo(-eyeOff + ew*0.3, eyeY);
+        ctx.lineTo(-eyeOff - ew, eyeY + eh);
+        ctx.stroke();
+        // Right eye <
+        ctx.beginPath();
+        ctx.moveTo(eyeOff + ew, eyeY - eh);
+        ctx.lineTo(eyeOff - ew*0.3, eyeY);
+        ctx.lineTo(eyeOff + ew, eyeY + eh);
+        ctx.stroke();
+    } else {
+        // Normal eyes
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.ellipse(-eyeOff, eyeY, eww, ewh, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(eyeOff, eyeY, eww, ewh, 0, 0, Math.PI*2);
+        ctx.fill();
 
-    // Pupils
-    const pp = eww * 0.22;
-    ctx.fillStyle = '#111';
-    ctx.beginPath();
-    ctx.ellipse(-eyeOff+pp, eyeY, eww*0.52, ewh*0.62, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(eyeOff+pp, eyeY, eww*0.52, ewh*0.62, 0, 0, Math.PI*2);
-    ctx.fill();
+        // Pupils
+        const pp = eww * 0.22;
+        ctx.fillStyle = '#111';
+        ctx.beginPath();
+        ctx.ellipse(-eyeOff+pp, eyeY, eww*0.52, ewh*0.62, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(eyeOff+pp, eyeY, eww*0.52, ewh*0.62, 0, 0, Math.PI*2);
+        ctx.fill();
 
-    // Eye shine
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(-eyeOff+pp-eww*0.15, eyeY-ewh*0.25, eww*0.22, 0, Math.PI*2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(eyeOff+pp-eww*0.15, eyeY-ewh*0.25, eww*0.22, 0, Math.PI*2);
-    ctx.fill();
+        // Eye shine
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(-eyeOff+pp-eww*0.15, eyeY-ewh*0.25, eww*0.22, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(eyeOff+pp-eww*0.15, eyeY-ewh*0.25, eww*0.22, 0, Math.PI*2);
+        ctx.fill();
+    }
 
     // Mouth
     ctx.strokeStyle = color.dark;
@@ -2056,7 +2170,7 @@ function drawSlime(x, y, size, sx, sy, color, crown) {
 }
 
 // ── Draw NES character ──
-function drawNESChar(x, y, size, sx, sy, charIdx, crown) {
+function drawNESChar(x, y, size, sx, sy, charIdx, crown, fx) {
     const img = nesCharImages[charIdx % nesCharImages.length];
     if (!img || img.width === 0) return;
     ctx.save();
@@ -2073,6 +2187,67 @@ function drawNESChar(x, y, size, sx, sy, charIdx, crown) {
     const scale = (size * 2) / Math.max(img.width, img.height);
     const w = img.width * scale, h = img.height * scale;
     ctx.drawImage(img, -w / 2, -h + size * 0.3, w, h);
+
+    // ── Effect overlay on character ──
+    if (fx === 'trip') {
+        // X eyes overlay
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        const xs = size * 0.15;
+        const eyeY = -h * 0.65 + size * 0.3;
+        const eyeOff = size * 0.25;
+        // Left eye X
+        ctx.beginPath();
+        ctx.moveTo(-eyeOff - xs, eyeY - xs);
+        ctx.lineTo(-eyeOff + xs, eyeY + xs);
+        ctx.moveTo(-eyeOff - xs, eyeY + xs);
+        ctx.lineTo(-eyeOff + xs, eyeY - xs);
+        ctx.stroke();
+        // Right eye X
+        ctx.beginPath();
+        ctx.moveTo(eyeOff - xs, eyeY - xs);
+        ctx.lineTo(eyeOff + xs, eyeY + xs);
+        ctx.moveTo(eyeOff - xs, eyeY + xs);
+        ctx.lineTo(eyeOff + xs, eyeY - xs);
+        ctx.stroke();
+    } else if (fx === 'sleep') {
+        // Closed eyes overlay
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        const eyeY = -h * 0.65 + size * 0.3;
+        const eyeOff = size * 0.25;
+        const eyeW = size * 0.15;
+        ctx.beginPath();
+        ctx.moveTo(-eyeOff - eyeW, eyeY);
+        ctx.lineTo(-eyeOff + eyeW, eyeY);
+        ctx.moveTo(eyeOff - eyeW, eyeY);
+        ctx.lineTo(eyeOff + eyeW, eyeY);
+        ctx.stroke();
+    } else if (fx === 'boost') {
+        // > < eyes overlay (determined/focused expression)
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        const eyeY = -h * 0.65 + size * 0.3;
+        const eyeOff = size * 0.25;
+        const ew = size * 0.15;
+        const eh = size * 0.12;
+        // Left eye >
+        ctx.beginPath();
+        ctx.moveTo(-eyeOff - ew, eyeY - eh);
+        ctx.lineTo(-eyeOff + ew*0.3, eyeY);
+        ctx.lineTo(-eyeOff - ew, eyeY + eh);
+        ctx.stroke();
+        // Right eye <
+        ctx.beginPath();
+        ctx.moveTo(eyeOff + ew, eyeY - eh);
+        ctx.lineTo(eyeOff - ew*0.3, eyeY);
+        ctx.lineTo(eyeOff + ew, eyeY + eh);
+        ctx.stroke();
+    }
 
     // Crown (same logic as drawSlime)
     if (crown) {
