@@ -483,17 +483,21 @@
         <div class="setup-row">
             <span class="setup-label">총 슬라임 수</span>
             <div class="count-controls">
-                <button class="count-btn" onclick="changeCount(-1)">-</button>
-                <input type="number" id="player-count" value="4" min="2" max="1000" oninput="setCount(this.value)">
-                <button class="count-btn" onclick="changeCount(1)">+</button>
+                <button class="count-btn" onclick="setCountMin()" style="font-size:10px;width:auto;padding:0 8px;">MIN</button>
+                <button class="count-btn" onmousedown="startCountRepeat(-1)" onmouseup="stopCountRepeat()" onmouseleave="stopCountRepeat()" ontouchstart="startCountRepeat(-1)" ontouchend="stopCountRepeat()" ontouchcancel="stopCountRepeat()">-</button>
+                <input type="number" id="player-count" value="45" min="2" max="1000" oninput="setCount(this.value)">
+                <button class="count-btn" onmousedown="startCountRepeat(1)" onmouseup="stopCountRepeat()" onmouseleave="stopCountRepeat()" ontouchstart="startCountRepeat(1)" ontouchend="stopCountRepeat()" ontouchcancel="stopCountRepeat()">+</button>
+                <button class="count-btn" onclick="setCountMax()" style="font-size:10px;width:auto;padding:0 8px;">MAX</button>
             </div>
         </div>
         <div class="setup-row">
             <span class="setup-label">레이싱 참가 슬라임 수</span>
             <div class="count-controls">
-                <button class="count-btn" onclick="changeRaceCount(-1)">-</button>
-                <input type="number" id="race-count" value="4" min="2" max="15" oninput="setRaceCount(this.value)">
-                <button class="count-btn" onclick="changeRaceCount(1)">+</button>
+                <button class="count-btn" onclick="setRaceCountMin()" style="font-size:10px;width:auto;padding:0 8px;">MIN</button>
+                <button class="count-btn" onmousedown="startRaceCountRepeat(-1)" onmouseup="stopRaceCountRepeat()" onmouseleave="stopRaceCountRepeat()" ontouchstart="startRaceCountRepeat(-1)" ontouchend="stopRaceCountRepeat()" ontouchcancel="stopRaceCountRepeat()">-</button>
+                <input type="number" id="race-count" value="6" min="2" max="15" oninput="setRaceCount(this.value)">
+                <button class="count-btn" onmousedown="startRaceCountRepeat(1)" onmouseup="stopRaceCountRepeat()" onmouseleave="stopRaceCountRepeat()" ontouchstart="startRaceCountRepeat(1)" ontouchend="stopRaceCountRepeat()" ontouchcancel="stopRaceCountRepeat()">+</button>
+                <button class="count-btn" onclick="setRaceCountMax()" style="font-size:10px;width:auto;padding:0 8px;">MAX</button>
             </div>
         </div>
         <div class="setup-row" id="draw-notice" style="display:none; margin-top:-8px; margin-bottom:4px;">
@@ -515,7 +519,7 @@
             <label class="sd-checkbox">
                 <input type="checkbox" id="use-nes-chars" onchange="saveSetup()">
                 <span class="sd-check-box"></span>
-                <span>NES 캐릭터</span>
+                <span>NIN..DO</span>
             </label>
         </div>
         <div class="setup-row">
@@ -530,9 +534,11 @@
         <div class="setup-row">
             <span class="setup-label">레이스 시간</span>
             <div class="count-controls">
-                <button class="count-btn" onclick="changeTime(-1)">-</button>
+                <button class="count-btn" onclick="setTimeMin()" style="font-size:10px;width:auto;padding:0 8px;">MIN</button>
+                <button class="count-btn" onmousedown="startTimeRepeat(-1)" onmouseup="stopTimeRepeat()" onmouseleave="stopTimeRepeat()" ontouchstart="startTimeRepeat(-1)" ontouchend="stopTimeRepeat()" ontouchcancel="stopTimeRepeat()">-</button>
                 <input type="number" id="time-input" value="10" min="3" max="60" oninput="setTime(this.value)">
-                <button class="count-btn" onclick="changeTime(1)">+</button>
+                <button class="count-btn" onmousedown="startTimeRepeat(1)" onmouseup="stopTimeRepeat()" onmouseleave="stopTimeRepeat()" ontouchstart="startTimeRepeat(1)" ontouchend="stopTimeRepeat()" ontouchcancel="stopTimeRepeat()">+</button>
+                <button class="count-btn" onclick="setTimeMax()" style="font-size:10px;width:auto;padding:0 8px;">MAX</button>
                 <span class="unit">SEC</span>
             </div>
         </div>
@@ -619,8 +625,8 @@ const HEADER_H = 46;
 const CROWD_H = 24;
 
 // ── State ──
-let playerCount = 4;
-let racePlayerCount = 4;  // Actual racers (2-15)
+let playerCount = 45;
+let racePlayerCount = 6;  // Actual racers (2-15)
 let players = [];
 let targetTime = 10;
 let state = 'title';
@@ -816,6 +822,13 @@ function showSetup() {
 }
 
 // ── Setup UI ──
+let countRepeatTimer = null;
+let countRepeatInterval = null;
+let raceCountRepeatTimer = null;
+let raceCountRepeatInterval = null;
+let timeRepeatTimer = null;
+let timeRepeatInterval = null;
+
 function updateDrawNotice() {
     const notice = document.getElementById('draw-notice');
     if (playerCount > racePlayerCount) {
@@ -833,6 +846,46 @@ function changeCount(d) {
         racePlayerCount = playerCount;
         document.getElementById('race-count').value = racePlayerCount;
     }
+    updateDrawNotice();
+    buildPlayerInputs();
+    saveSetup();
+    sfxTick();
+}
+
+function startCountRepeat(d) {
+    changeCount(d);
+    countRepeatTimer = setTimeout(() => {
+        countRepeatInterval = setInterval(() => changeCount(d), 50);
+    }, 500);
+}
+
+function stopCountRepeat() {
+    if (countRepeatTimer) {
+        clearTimeout(countRepeatTimer);
+        countRepeatTimer = null;
+    }
+    if (countRepeatInterval) {
+        clearInterval(countRepeatInterval);
+        countRepeatInterval = null;
+    }
+}
+
+function setCountMin() {
+    playerCount = 2;
+    document.getElementById('player-count').value = playerCount;
+    if (racePlayerCount > playerCount) {
+        racePlayerCount = playerCount;
+        document.getElementById('race-count').value = racePlayerCount;
+    }
+    updateDrawNotice();
+    buildPlayerInputs();
+    saveSetup();
+    sfxTick();
+}
+
+function setCountMax() {
+    playerCount = 1000;
+    document.getElementById('player-count').value = playerCount;
     updateDrawNotice();
     buildPlayerInputs();
     saveSetup();
@@ -860,6 +913,40 @@ function changeRaceCount(d) {
     sfxTick();
 }
 
+function startRaceCountRepeat(d) {
+    changeRaceCount(d);
+    raceCountRepeatTimer = setTimeout(() => {
+        raceCountRepeatInterval = setInterval(() => changeRaceCount(d), 50);
+    }, 500);
+}
+
+function stopRaceCountRepeat() {
+    if (raceCountRepeatTimer) {
+        clearTimeout(raceCountRepeatTimer);
+        raceCountRepeatTimer = null;
+    }
+    if (raceCountRepeatInterval) {
+        clearInterval(raceCountRepeatInterval);
+        raceCountRepeatInterval = null;
+    }
+}
+
+function setRaceCountMin() {
+    racePlayerCount = 2;
+    document.getElementById('race-count').value = racePlayerCount;
+    updateDrawNotice();
+    saveSetup();
+    sfxTick();
+}
+
+function setRaceCountMax() {
+    racePlayerCount = Math.min(15, playerCount);
+    document.getElementById('race-count').value = racePlayerCount;
+    updateDrawNotice();
+    saveSetup();
+    sfxTick();
+}
+
 function setRaceCount(val) {
     const n = parseInt(val);
     if (!isNaN(n)) racePlayerCount = Math.max(2, Math.min(15, Math.min(playerCount, n)));
@@ -870,6 +957,38 @@ function setRaceCount(val) {
 
 function changeTime(d) {
     targetTime = Math.max(3, Math.min(60, (parseInt(document.getElementById('time-input').value) || 10) + d));
+    document.getElementById('time-input').value = targetTime;
+    saveSetup();
+    sfxTick();
+}
+
+function startTimeRepeat(d) {
+    changeTime(d);
+    timeRepeatTimer = setTimeout(() => {
+        timeRepeatInterval = setInterval(() => changeTime(d), 50);
+    }, 500);
+}
+
+function stopTimeRepeat() {
+    if (timeRepeatTimer) {
+        clearTimeout(timeRepeatTimer);
+        timeRepeatTimer = null;
+    }
+    if (timeRepeatInterval) {
+        clearInterval(timeRepeatInterval);
+        timeRepeatInterval = null;
+    }
+}
+
+function setTimeMin() {
+    targetTime = 3;
+    document.getElementById('time-input').value = targetTime;
+    saveSetup();
+    sfxTick();
+}
+
+function setTimeMax() {
+    targetTime = 60;
     document.getElementById('time-input').value = targetTime;
     saveSetup();
     sfxTick();
@@ -1340,9 +1459,13 @@ function updateRace() {
         jf.p.rank = finishOrder.length;
         finishOrder.push(jf.p);
         
-        // Capture snapshot when 1st place finishes
+        // Capture snapshot when 1st place finishes (delayed to show crown)
         if (finishOrder.length === 1 && !finishSnapshot) {
-            finishSnapshot = canvas.toDataURL('image/png');
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    finishSnapshot = canvas.toDataURL('image/png');
+                });
+            });
             if (earlyFinish) earlyFinishTime = performance.now();
         }
         
@@ -2218,10 +2341,10 @@ function loadSetup() {
 
 function resetSetup() {
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
-    playerCount = 4;
-    racePlayerCount = 4;
-    document.getElementById('player-count').value = 4;
-    document.getElementById('race-count').value = 4;
+    playerCount = 45;
+    racePlayerCount = 6;
+    document.getElementById('player-count').value = 45;
+    document.getElementById('race-count').value = 6;
     document.getElementById('use-names').checked = false;
     document.getElementById('use-nes-chars').checked = false;
     document.getElementById('early-finish').checked = true;
