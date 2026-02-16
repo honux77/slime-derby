@@ -6,7 +6,6 @@
 const CROWD_SKINS = ['#ffdbac','#f1c27d','#e0ac69','#c68642','#8d5524'];
 const CROWD_HAIRS = ['#1a1a2e','#4a2810','#8b6914','#d4a030','#a02020','#3060a0','#206030','#e8e0d0'];
 const CROWD_OUTFITS = ['#cc2222','#2255cc','#22aa44','#ddaa00','#8833cc','#cc5599','#dd7700','#22bbbb','#ddd','#666'];
-const CROWD_Y = HEADER_H + CROWD_H - 6;
 
 // Stadium spectators
 function generateSpectators() {
