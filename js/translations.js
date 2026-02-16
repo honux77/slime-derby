@@ -141,6 +141,24 @@ const TRANSLATIONS = {
         awakeningCheer11: '감동이야!!',
         awakeningCheer12: '이게 바로 각성!!',
         
+        // Awakening Moment Cheers (when awakening triggers)
+        awakeningMoment1: '각성이다!!',
+        awakeningMoment2: '저게 뭐야?!',
+        awakeningMoment3: '황금빛!!',
+        awakeningMoment4: '믿을수없어!!',
+        awakeningMoment5: '대박!!',
+        awakeningMoment6: '역전온다!!',
+        awakeningMoment7: '엄청나!!',
+        awakeningMoment8: '저거봐!!',
+        awakeningMoment9: '와!!',
+        awakeningMoment10: '저슬라임!!',
+        awakeningMoment11: '미쳤다!!',
+        awakeningMoment12: '환상적!!',
+        awakeningMoment13: '역전가능?!',
+        awakeningMoment14: '오라가!!',
+        awakeningMoment15: '저파워!!',
+        awakeningMoment16: '대단해!!',
+        
         // Default Names
         defaultName1: '초록이',
         defaultName2: '파랑이',
@@ -289,6 +307,24 @@ const TRANSLATIONS = {
         awakeningCheer10: 'No way!!',
         awakeningCheer11: 'So emotional!!',
         awakeningCheer12: 'True Awakening!!',
+        
+        // Awakening Moment Cheers (when awakening triggers)
+        awakeningMoment1: 'Awakening!!',
+        awakeningMoment2: 'What is that?!',
+        awakeningMoment3: 'Golden Glow!!',
+        awakeningMoment4: 'Unbelievable!!',
+        awakeningMoment5: 'Amazing!!',
+        awakeningMoment6: 'Comeback Coming!!',
+        awakeningMoment7: 'Incredible!!',
+        awakeningMoment8: 'Look at that!!',
+        awakeningMoment9: 'Wow!!',
+        awakeningMoment10: 'That Slime!!',
+        awakeningMoment11: 'Insane!!',
+        awakeningMoment12: 'Fantastic!!',
+        awakeningMoment13: 'Comeback Possible?!',
+        awakeningMoment14: 'That Aura!!',
+        awakeningMoment15: 'Such Power!!',
+        awakeningMoment16: 'Awesome!!',
         
         // Default Names
         defaultName1: 'Green',

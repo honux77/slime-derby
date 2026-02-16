@@ -169,10 +169,10 @@ function updateRace() {
             
             // Crowd goes wild with excitement!
             const crowdCheers = [
-                '각성이다!!', '저게 뭐야?!', '황금빛!!', '믿을수없어!!',
-                '대박!!', '역전온다!!', '엄청나!!', '저거봐!!',
-                '와!!', '저슬라임!!', '미쳤다!!', '환상적!!',
-                '역전가능?!', '오라가!!', '저파워!!', '대단해!!'
+                t('awakeningMoment1'), t('awakeningMoment2'), t('awakeningMoment3'), t('awakeningMoment4'),
+                t('awakeningMoment5'), t('awakeningMoment6'), t('awakeningMoment7'), t('awakeningMoment8'),
+                t('awakeningMoment9'), t('awakeningMoment10'), t('awakeningMoment11'), t('awakeningMoment12'),
+                t('awakeningMoment13'), t('awakeningMoment14'), t('awakeningMoment15'), t('awakeningMoment16')
             ];
             
             // Spawn many crowd cheers rapidly
