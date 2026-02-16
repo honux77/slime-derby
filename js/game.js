@@ -194,7 +194,8 @@ function updateRace() {
                         life: 80, maxLife: 80,
                         color: pick(cheerColors), grav: false,
                         textSize: true,
-                        isSpeechBubble: true
+                        isSpeechBubble: true,
+                        isAwakeningCheer: true
                     });
                 }, i * 50); // Rapid succession
             }
@@ -958,8 +959,16 @@ function render() {
                 const bubbleH = textH + padding * 2;
                 
                 ctx.fillStyle = '#fff';
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
+                
+                // Awakening cheers get golden border
+                if (pt.isAwakeningCheer) {
+                    ctx.strokeStyle = '#ffd700';
+                    ctx.lineWidth = 3;
+                } else {
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                }
+                
                 ctx.beginPath();
                 ctx.roundRect(pt.x - bubbleW/2, pt.y - bubbleH/2, bubbleW, bubbleH, 3);
                 ctx.fill();
@@ -1023,6 +1032,33 @@ function onCanvasClick(e) {
             clickedSlime.fxCooldown = 9999;
             spawnFxText(clickedSlime, t('awakening'), '#ffd700');
             sfxBoost();
+            
+            // Crowd goes wild with excitement!
+            const crowdCheers = [
+                t('awakeningMoment1'), t('awakeningMoment2'), t('awakeningMoment3'), t('awakeningMoment4'),
+                t('awakeningMoment5'), t('awakeningMoment6'), t('awakeningMoment7'), t('awakeningMoment8'),
+                t('awakeningMoment9'), t('awakeningMoment10'), t('awakeningMoment11'), t('awakeningMoment12'),
+                t('awakeningMoment13'), t('awakeningMoment14'), t('awakeningMoment15'), t('awakeningMoment16')
+            ];
+            
+            // Spawn many crowd cheers rapidly
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const text = pick(crowdCheers);
+                    const cheerColors = ['#ffd700', '#ffaa00', '#ff8800', '#ffdd00'];
+                    particles.push({
+                        x: TRACK_L + 40 + Math.random() * (TRACK_LEN - 100),
+                        y: CROWD_Y + Math.random() * 30,
+                        vx: 0, vy: -1.2,
+                        text, size: 12 + Math.random() * 6,
+                        life: 80, maxLife: 80,
+                        color: pick(cheerColors), grav: false,
+                        textSize: true,
+                        isSpeechBubble: true,
+                        isAwakeningCheer: true
+                    });
+                }, i * 50);
+            }
         }
         lastClickedPlayer = null;
         lastClickTime = 0;
