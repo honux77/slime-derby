@@ -901,16 +901,11 @@ function render() {
         ctx.fillStyle = '#ffd700';
         ctx.shadowColor = '#ffd700';
         ctx.shadowBlur = 16;
-        let fx = CW / 2;
-        let fy = CH / 2;
-        if (uiCtx) {
-            const pos = uiCtx.map(
-                uiCtx.rect.left + uiCtx.rect.width / 2,
-                uiCtx.rect.top + uiCtx.rect.height / 2
-            );
-            fx = pos.x;
-            fy = pos.y;
-        }
+        
+        // Always use actual canvas center (not mobile camera position)
+        const fx = CW / 2;
+        const fy = CH / 2;
+        
         ctx.fillText('FINISH!', fx, fy);
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
