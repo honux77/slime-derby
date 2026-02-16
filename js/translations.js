@@ -20,9 +20,11 @@ const TRANSLATIONS = {
         max: 'MAX',
         backToTitle: '돌아가기',
         startGame: '게임 시작',
+        drawNotice: '※ 랜덤 추첨 화면이 표시됩니다',
         
         // Draw Screen
         drawTitle: '슬라임 선택',
+        drawSubtitle: '총 {total}명 중 {selected}명 선발!',
         playerName: '이름',
         selectSlime: '슬라임 선택',
         randomDraw: '랜덤 뽑기',
@@ -165,9 +167,11 @@ const TRANSLATIONS = {
         max: 'MAX',
         backToTitle: 'BACK',
         startGame: 'START GAME',
+        drawNotice: '※ Random draw screen will be displayed',
         
         // Draw Screen
-        drawTitle: 'SELECT YOUR SLIME',
+        drawTitle: 'RANDOM DRAW',
+        drawSubtitle: 'Selecting {selected} out of {total} slimes!',
         playerName: 'Name',
         selectSlime: 'Pick a Slime',
         randomDraw: 'Random Pick',

@@ -41,8 +41,12 @@ function showSetup() {
 // Draw notice for lottery mode
 function updateDrawNotice() {
     const notice = document.getElementById('draw-notice');
+    const noticeText = document.getElementById('draw-notice-text');
     if (playerCount > racePlayerCount) {
         notice.style.display = 'flex';
+        if (noticeText) {
+            noticeText.textContent = t('drawNotice');
+        }
     } else {
         notice.style.display = 'none';
     }
@@ -251,8 +255,31 @@ function buildPlayerInputs() {
 function showDraw(picked) {
     state = 'draw';
     showScreen('select-screen');
+    
+    // Update with translations
+    const drawTitle = document.getElementById('draw-title');
+    const drawSubtitle = document.getElementById('draw-subtitle');
+    const drawStartBtn = document.getElementById('draw-start-btn');
+    
+    if (drawTitle) drawTitle.textContent = t('drawTitle');
+    if (drawStartBtn) drawStartBtn.textContent = t('startRace');
+    
     document.getElementById('draw-total').textContent = playerCount;
     document.getElementById('draw-selected').textContent = racePlayerCount;
+    
+    // Update subtitle with player counts
+    if (drawSubtitle) {
+        const subtitleText = t('drawSubtitle')
+            .replace('{total}', playerCount)
+            .replace('{selected}', racePlayerCount);
+        drawSubtitle.innerHTML = subtitleText.replace(/(\d+)/g, (match, num) => {
+            if (num === String(racePlayerCount)) {
+                return `<span style="color:var(--green)">${num}</span>`;
+            }
+            return num;
+        });
+    }
+    
     const grid = document.getElementById('draw-grid');
     grid.innerHTML = '';
     for (let i = 0; i < picked.length && i < racePlayerCount; i++) {
@@ -572,6 +599,12 @@ function toggleLanguage() {
     const startBtn = document.getElementById('start-btn');
     if (startBtn) {
         startBtn.textContent = 'PRESS START';
+    }
+    
+    // Update draw notice
+    const drawNoticeText = document.getElementById('draw-notice-text');
+    if (drawNoticeText) {
+        drawNoticeText.textContent = t('drawNotice');
     }
 }
 

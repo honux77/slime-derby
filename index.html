@@ -82,7 +82,7 @@
         </div>
         <div class="setup-row" id="draw-notice" style="display:none; margin-top:-8px; margin-bottom:4px;">
             <span class="setup-label"></span>
-            <div style="font-size:9px; color:#ffdd00; line-height:1.5;">
+            <div style="font-size:9px; color:#ffdd00; line-height:1.5;" id="draw-notice-text">
                 ※ 랜덤 추첨 화면이 표시됩니다
             </div>
         </div>
@@ -130,10 +130,10 @@
 
     <!-- Draw (selection) -->
     <div id="select-screen" class="screen">
-        <h2>RANDOM DRAW</h2>
-        <p class="draw-sub">총 <span id="draw-total">0</span>명 중 <span id="draw-selected" style="color:var(--green)">0</span>명 선발!</p>
+        <h2 id="draw-title">RANDOM DRAW</h2>
+        <p class="draw-sub" id="draw-subtitle">총 <span id="draw-total">0</span>명 중 <span id="draw-selected" style="color:var(--green)">0</span>명 선발!</p>
         <div class="draw-grid" id="draw-grid"></div>
-        <button class="btn primary" onclick="beginRace()" style="margin-top:12px;font-size:14px">START RACE!</button>
+        <button class="btn primary" onclick="beginRace()" style="margin-top:12px;font-size:14px" id="draw-start-btn">START RACE!</button>
     </div>
 
     <!-- Game -->
