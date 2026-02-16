@@ -50,7 +50,7 @@ const TRANSLATIONS = {
         time: '기록',
         stats: '통계',
         boosts: '부스트',
-        trips: '넘어짐',
+        trips: '꽈당',
         sleeps: '졸음',
         downloadImage: '결과 다운로드',
         newRace: '새 경주',
@@ -206,9 +206,9 @@ const TRANSLATIONS = {
         
         // Effects (한글로!)
         boost: '부스트!',
-        trip: '넘어짐!',
-        sleep: 'Zzz..',
-        awakening: '각성!',
+        trip: '꽈당!',
+        sleep: '졸려..',
+        awakening: '프리더!',
         
         // Results
         resultsTitle: 'RACE RESULTS',
