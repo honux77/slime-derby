@@ -118,7 +118,6 @@ function beginRace() {
     if (!clickListenerAdded && canvas) {
         canvas.addEventListener('click', onCanvasClick);
         clickListenerAdded = true;
-        console.log('✅ Click listener added to canvas');
     }
 
     state = 'countdown'; cdValue = 3;
@@ -976,24 +975,19 @@ function render() {
     ctx.textBaseline = 'alphabetic';
 }
 
-// ── Easter Egg: Click Slime for Boost ──
+// ── Easter Egg: Double-click Slime for Awakening ──
 let clickListenerAdded = false;
+let lastClickTime = 0;
+let lastClickedPlayer = null;
 
 function getClickedSlime(clientX, clientY) {
-    console.log('🎯 Click detected! State:', state);
-    
-    if (state !== 'racing') {
-        console.log('❌ Not racing, ignoring click');
-        return null;
-    }
+    if (state !== 'racing') return null;
     
     const rect = canvas.getBoundingClientRect();
     const scaleX = CW / rect.width;
     const scaleY = CH / rect.height;
     const x = (clientX - rect.left) * scaleX;
     const y = (clientY - rect.top) * scaleY;
-    
-    console.log('📍 Click position:', { clientX, clientY, canvasX: x, canvasY: y });
     
     // Check each player
     for (const p of players) {
@@ -1003,41 +997,39 @@ function getClickedSlime(clientX, clientY) {
         const slimeY = p.y;
         const slimeSize = Math.min(p.laneH * 0.6, 40);
         
-        console.log(`🐌 ${p.name}: pos=${slimeX.toFixed(0)}, y=${slimeY.toFixed(0)}, size=${slimeSize.toFixed(0)}, cooldown=${p.fxCooldown}`);
-        
         // Check if click is within slime bounds (generous hitbox)
         const dx = x - slimeX;
         const dy = y - slimeY;
         if (Math.abs(dx) < slimeSize * 1.5 && Math.abs(dy) < slimeSize) {
-            console.log(`✅ HIT! ${p.name} clicked!`);
             return p;
         }
     }
-    
-    console.log('❌ No slime clicked');
     return null;
 }
 
 function onCanvasClick(e) {
-    console.log('=== CLICK EVENT ===');
     const clickedSlime = getClickedSlime(e.clientX, e.clientY);
-    if (!clickedSlime) {
-        console.log('No slime found');
-        return;
-    }
+    if (!clickedSlime) return;
     
-    console.log(`Slime ${clickedSlime.name} clicked, cooldown: ${clickedSlime.fxCooldown}`);
+    const now = Date.now();
+    const timeDiff = now - lastClickTime;
     
-    // Trigger awakening effect!
-    if (clickedSlime.fxCooldown <= 0) {
-        console.log(`✨ AWAKENING applied to ${clickedSlime.name}!`);
-        clickedSlime.fx = 'awakening';
-        clickedSlime.fxTimer = 180;
-        clickedSlime.fxCooldown = 9999;
-        spawnFxText(clickedSlime, t('awakening'), '#ffd700');
-        sfxBoost();
+    // Double-click detected (within 500ms and same slime)
+    if (timeDiff < 500 && lastClickedPlayer === clickedSlime) {
+        // Trigger awakening effect!
+        if (clickedSlime.fxCooldown <= 0) {
+            clickedSlime.fx = 'awakening';
+            clickedSlime.fxTimer = 180;
+            clickedSlime.fxCooldown = 9999;
+            spawnFxText(clickedSlime, t('awakening'), '#ffd700');
+            sfxBoost();
+        }
+        lastClickedPlayer = null;
+        lastClickTime = 0;
     } else {
-        console.log(`⏳ Cooldown active: ${clickedSlime.fxCooldown} frames remaining`);
+        // First click
+        lastClickedPlayer = clickedSlime;
+        lastClickTime = now;
     }
 }
 
