@@ -23,6 +23,14 @@ const SLIME_COLORS = [
 
 const DEFAULT_NAMES = ['초록이','파랑이','빨강이','노랑이','보라','핑크','주황이','하늘이'];
 
+// Function to get localized default names
+function getLocalizedDefaultNames() {
+    if (typeof getDefaultNames === 'function') {
+        return getDefaultNames();
+    }
+    return DEFAULT_NAMES;
+}
+
 const NES_CHARS = [
     { cls: 'nes-mario', name: '마리오' },
     { cls: 'nes-ash', name: '사토시' },

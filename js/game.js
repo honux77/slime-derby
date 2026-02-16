@@ -2,81 +2,6 @@
    SLIME DERBY - Game Logic
    ========================================================= */
 
-// Color definitions
-const SLIME_COLORS = [
-    { hex: '#58d854', dark: '#2e8a2c', light: '#8aff88' },
-    { hex: '#4488ff', dark: '#2255bb', light: '#88bbff' },
-    { hex: '#ff4444', dark: '#bb2222', light: '#ff8888' },
-    { hex: '#ffdd00', dark: '#bb9900', light: '#ffee88' },
-    { hex: '#aa44ff', dark: '#7722bb', light: '#cc88ff' },
-    { hex: '#ff88cc', dark: '#bb5588', light: '#ffbbee' },
-    { hex: '#ff8800', dark: '#bb5500', light: '#ffbb66' },
-    { hex: '#44dddd', dark: '#228888', light: '#88ffee' },
-    { hex: '#88ff44', dark: '#55bb22', light: '#aaffaa' },
-    { hex: '#ff44aa', dark: '#bb2277', light: '#ff88cc' },
-    { hex: '#ffaa44', dark: '#bb7722', light: '#ffcc88' },
-    { hex: '#8844ff', dark: '#5522bb', light: '#aa88ff' },
-    { hex: '#44ffaa', dark: '#22bb77', light: '#88ffcc' },
-    { hex: '#ff4488', dark: '#bb2255', light: '#ff88aa' },
-    { hex: '#aaff44', dark: '#77bb22', light: '#ccff88' },
-];
-
-const DEFAULT_NAMES = ['초록이','파랑이','빨강이','노랑이','보라','핑크','주황이','하늘이'];
-
-const NES_CHARS = [
-    { cls: 'nes-mario', name: '마리오' },
-    { cls: 'nes-ash', name: '사토시' },
-    { cls: 'nes-kirby', name: '커비' },
-    { cls: 'nes-bulbasaur', name: '이상해씨' },
-    { cls: 'nes-charmander', name: '파이리' },
-    { cls: 'nes-squirtle', name: '꼬부기' },
-    { cls: 'nes-pokeball', name: '몬스터볼' },
-    { cls: 'nes-octocat', name: '옥토캣' },
-];
-
-let nesCharImages = [];
-let useNESChars = false;
-let earlyFinish = false;
-let earlyFinishTime = 0;
-
-// Canvas constants
-const CW = 800, CH = 480;
-const TRACK_L = 130, TRACK_R = CW - 30;
-const TRACK_LEN = TRACK_R - TRACK_L;
-const HEADER_H = 46;
-const CROWD_H = 24;
-
-// Game state
-let playerCount = 45;
-let racePlayerCount = 6;
-let players = [];
-let targetTime = 10;
-let state = 'title';
-
-// Accessory types
-const ACCESSORIES = [
-    { type: 'ribbon' },
-    { type: 'cap' },
-    { type: 'tophat' },
-    null, null, null, null, null, null, null,
-];
-
-let canvas, ctx, animId;
-let raceStart = 0;
-let cdValue = 0;
-let cdTimer = null;
-let finishOrder = [];
-let pace = 1;
-let frame = 0;
-let particles = [];
-let droppedAccessories = [];
-let spectators = [];
-let allDone = false;
-let finishSnapshot = null;
-let isMobile = false;
-let cameraX = 0;
-let surgeTriggered = false;
-
 // Utility functions
 function pick(a) { return a[Math.floor(Math.random()*a.length)]; }
 
@@ -241,6 +166,32 @@ function updateRace() {
             chosen.fxCooldown = 9999;
             spawnFxText(chosen, 'AWAKENING!', '#ffd700');
             sfxBoost();
+            
+            // Crowd goes wild with excitement!
+            const crowdCheers = [
+                '각성이다!!', '저게 뭐야?!', '황금빛!!', '믿을수없어!!',
+                '대박!!', '역전온다!!', '엄청나!!', '저거봐!!',
+                '와!!', '저슬라임!!', '미쳤다!!', '환상적!!',
+                '역전가능?!', '오라가!!', '저파워!!', '대단해!!'
+            ];
+            
+            // Spawn many crowd cheers rapidly
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const text = pick(crowdCheers);
+                    const cheerColors = ['#ffd700', '#ffaa00', '#ff8800', '#ffdd00'];
+                    particles.push({
+                        x: TRACK_L + 40 + Math.random() * (TRACK_LEN - 100),
+                        y: CROWD_Y + Math.random() * 30,
+                        vx: 0, vy: -1.2,
+                        text, size: 12 + Math.random() * 6,
+                        life: 80, maxLife: 80,
+                        color: pick(cheerColors), grav: false,
+                        textSize: true,
+                        isSpeechBubble: true
+                    });
+                }, i * 50); // Rapid succession
+            }
         }
     }
 

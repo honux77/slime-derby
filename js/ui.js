@@ -549,3 +549,28 @@ function adjustCanvasForFullscreen(isFullscreen) {
         }
     }
 }
+
+// ── Language Toggle ──
+function toggleLanguage() {
+    const newLang = currentLang === 'ko' ? 'en' : 'ko';
+    setLanguage(newLang);
+    document.getElementById('lang-text').textContent = newLang === 'ko' ? 'EN' : '한';
+    
+    // Update subtitle
+    const subtitle = document.getElementById('subtitle-text');
+    if (subtitle) {
+        subtitle.textContent = newLang === 'ko' ? '슬라임 경주로 순서를 정하자!' : 'Let\'s race to decide the order!';
+    }
+    
+    // Update start button
+    const startBtn = document.getElementById('start-btn');
+    if (startBtn) {
+        startBtn.textContent = 'PRESS START';
+    }
+}
+
+// Initialize language on load
+window.addEventListener('DOMContentLoaded', () => {
+    loadLanguage();
+    document.getElementById('lang-text').textContent = currentLang === 'ko' ? 'EN' : '한';
+});

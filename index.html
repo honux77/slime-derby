@@ -37,6 +37,11 @@
 <div id="app">
     <!-- Fullscreen Toggle Button -->
     <button id="fullscreen-btn" onclick="toggleFullscreen()" title="풀스크린 토글">⛶</button>
+    
+    <!-- Language Toggle Button -->
+    <button id="lang-btn" onclick="toggleLanguage()" title="언어 변경 / Change Language">
+        <span id="lang-text">EN</span>
+    </button>
 
     <!-- Title -->
     <div id="title-screen" class="screen active">
@@ -45,8 +50,8 @@
             <div class="title-shadow"></div>
         </div>
         <h1>SLIME<br>DERBY</h1>
-        <p class="subtitle">슬라임 경주로 순서를 정하자!</p>
-        <button class="btn primary blink" onclick="showSetup()">PRESS START</button>
+        <p class="subtitle" id="subtitle-text">슬라임 경주로 순서를 정하자!</p>
+        <button class="btn primary blink" onclick="showSetup()" id="start-btn">PRESS START</button>
         <div class="visitor-counter">
             <img src="https://hits.sh/honux77.github.io/slime-derby.svg?label=Visitors&color=58d854&labelColor=0a0a1a" alt="Visitor Counter">
         </div>
@@ -154,6 +159,7 @@
 
 
 <!-- Scripts -->
+<script src="js/translations.js"></script>
 <script src="js/constants.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/rendering.js"></script>
