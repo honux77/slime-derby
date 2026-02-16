@@ -260,12 +260,14 @@ function showDraw(picked) {
     const drawTitle = document.getElementById('draw-title');
     const drawSubtitle = document.getElementById('draw-subtitle');
     const drawStartBtn = document.getElementById('draw-start-btn');
+    const drawTotal = document.getElementById('draw-total');
+    const drawSelected = document.getElementById('draw-selected');
     
     if (drawTitle) drawTitle.textContent = t('drawTitle');
     if (drawStartBtn) drawStartBtn.textContent = t('startRace');
     
-    document.getElementById('draw-total').textContent = playerCount;
-    document.getElementById('draw-selected').textContent = racePlayerCount;
+    if (drawTotal) drawTotal.textContent = playerCount;
+    if (drawSelected) drawSelected.textContent = racePlayerCount;
     
     // Update subtitle with player counts
     if (drawSubtitle) {

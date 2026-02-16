@@ -113,6 +113,13 @@ function beginRace() {
 
     finishOrder = []; pace = 1; frame = 0; particles = []; droppedAccessories = []; finishSnapshot = null; surgeTriggered = false;
     showScreen('game-screen');
+    
+    // Add click listener for easter egg (only once)
+    if (!clickListenerAdded && canvas) {
+        canvas.addEventListener('click', onCanvasClick);
+        clickListenerAdded = true;
+        console.log('✅ Click listener added to canvas');
+    }
 
     state = 'countdown'; cdValue = 3;
     playBgMusic();
@@ -970,6 +977,8 @@ function render() {
 }
 
 // ── Easter Egg: Click Slime for Boost ──
+let clickListenerAdded = false;
+
 function getClickedSlime(clientX, clientY) {
     console.log('🎯 Click detected! State:', state);
     
@@ -1009,7 +1018,7 @@ function getClickedSlime(clientX, clientY) {
     return null;
 }
 
-canvas.addEventListener('click', (e) => {
+function onCanvasClick(e) {
     console.log('=== CLICK EVENT ===');
     const clickedSlime = getClickedSlime(e.clientX, e.clientY);
     if (!clickedSlime) {
@@ -1031,7 +1040,7 @@ canvas.addEventListener('click', (e) => {
     } else {
         console.log(`⏳ Cooldown active: ${clickedSlime.fxCooldown} frames remaining`);
     }
-});
+}
 
 // Game loop
 function loop() {
