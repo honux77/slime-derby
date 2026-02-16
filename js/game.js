@@ -871,7 +871,7 @@ function render() {
         let cy = CH / 2;
         if (uiCtx) {
             const pos = uiCtx.map(
-                uiCtx.rect.left + uiCtx.rect.width / 2,
+                uiCtx.rect.left + uiCtx.rect.width / 2 - 40,
                 uiCtx.rect.top + uiCtx.rect.height / 2
             );
             cx = pos.x;
