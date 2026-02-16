@@ -413,7 +413,9 @@ function updateRace() {
                             text, size: 16 + Math.random() * 8,
                             life: 90, maxLife: 90,
                             color: pick(cheerColors), grav: false,
-                            textSize: true
+                            textSize: true,
+                            isSpeechBubble: true,
+                            isAwakeningCheer: true
                         });
                     }, i * 80);
                 }
