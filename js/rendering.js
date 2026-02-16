@@ -467,13 +467,14 @@ function drawSlime(x, y, size, sx, sy, color, crown, fx, accessory, hasAccessory
         ctx.lineTo(eyeOff + ew, eyeY + eh);
         ctx.stroke();
     } else if (fx === 'awakening') {
-        // Glowing golden eyes
+        // Glowing golden eyes with green pupils
         ctx.fillStyle = '#ffd700';
         ctx.strokeStyle = '#ffd700';
         ctx.lineWidth = 2;
         ctx.shadowColor = '#ffd700';
         ctx.shadowBlur = 10;
         
+        // Golden eye whites
         ctx.beginPath();
         ctx.ellipse(-eyeOff, eyeY, eww * 1.1, ewh * 0.8, -0.2, 0, Math.PI*2);
         ctx.fill();
@@ -483,6 +484,28 @@ function drawSlime(x, y, size, sx, sy, color, crown, fx, accessory, hasAccessory
         ctx.fill();
         
         ctx.shadowBlur = 0;
+        
+        // Green pupils
+        const pp = eww * 0.22;
+        ctx.fillStyle = '#00ff00';
+        ctx.shadowColor = '#00ff00';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.ellipse(-eyeOff+pp, eyeY, eww*0.52, ewh*0.62, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(eyeOff+pp, eyeY, eww*0.52, ewh*0.62, 0, 0, Math.PI*2);
+        ctx.fill();
+        
+        // Eye shine
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(-eyeOff+pp-eww*0.15, eyeY-ewh*0.25, eww*0.22, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(eyeOff+pp-eww*0.15, eyeY-ewh*0.25, eww*0.22, 0, Math.PI*2);
+        ctx.fill();
     } else {
         // Normal eyes
         ctx.fillStyle = '#fff';
