@@ -971,13 +971,20 @@ function render() {
 
 // ── Easter Egg: Click Slime for Boost ──
 function getClickedSlime(clientX, clientY) {
-    if (state !== 'racing') return null;
+    console.log('🎯 Click detected! State:', state);
+    
+    if (state !== 'racing') {
+        console.log('❌ Not racing, ignoring click');
+        return null;
+    }
     
     const rect = canvas.getBoundingClientRect();
     const scaleX = CW / rect.width;
     const scaleY = CH / rect.height;
     const x = (clientX - rect.left) * scaleX;
     const y = (clientY - rect.top) * scaleY;
+    
+    console.log('📍 Click position:', { clientX, clientY, canvasX: x, canvasY: y });
     
     // Check each player
     for (const p of players) {
@@ -987,28 +994,42 @@ function getClickedSlime(clientX, clientY) {
         const slimeY = p.y;
         const slimeSize = Math.min(p.laneH * 0.6, 40);
         
+        console.log(`🐌 ${p.name}: pos=${slimeX.toFixed(0)}, y=${slimeY.toFixed(0)}, size=${slimeSize.toFixed(0)}, cooldown=${p.fxCooldown}`);
+        
         // Check if click is within slime bounds (generous hitbox)
         const dx = x - slimeX;
         const dy = y - slimeY;
         if (Math.abs(dx) < slimeSize * 1.5 && Math.abs(dy) < slimeSize) {
+            console.log(`✅ HIT! ${p.name} clicked!`);
             return p;
         }
     }
+    
+    console.log('❌ No slime clicked');
     return null;
 }
 
 canvas.addEventListener('click', (e) => {
+    console.log('=== CLICK EVENT ===');
     const clickedSlime = getClickedSlime(e.clientX, e.clientY);
-    if (!clickedSlime) return;
+    if (!clickedSlime) {
+        console.log('No slime found');
+        return;
+    }
+    
+    console.log(`Slime ${clickedSlime.name} clicked, cooldown: ${clickedSlime.fxCooldown}`);
     
     // Trigger boost effect!
     if (clickedSlime.fxCooldown <= 0) {
+        console.log(`🚀 BOOST applied to ${clickedSlime.name}!`);
         clickedSlime.fx = 'boost';
         clickedSlime.fxTimer = 120;
         clickedSlime.fxCooldown = 300;
         clickedSlime.boostCount++;
         spawnFxText(clickedSlime, t('boost'), '#00ff00');
         sfxBoost();
+    } else {
+        console.log(`⏳ Cooldown active: ${clickedSlime.fxCooldown} frames remaining`);
     }
 });
 
