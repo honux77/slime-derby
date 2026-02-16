@@ -591,7 +591,7 @@ function toggleLanguage() {
     // Update language button text (opposite of current language)
     const langText = document.getElementById('lang-text');
     if (langText) {
-        langText.textContent = newLang === 'ko' ? 'EN' : '한';
+        langText.textContent = newLang === 'ko' ? 'EN' : '한글';
     }
     
     // Update subtitle
@@ -649,8 +649,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const langBtn = document.getElementById('lang-btn');
     if (langText) {
         // If current is Korean, show 'EN' (to switch to English)
-        // If current is English, show '한' (to switch to Korean)
-        langText.textContent = currentLang === 'ko' ? 'EN' : '한';
+        // If current is English, show '한글' (to switch to Korean)
+        langText.textContent = currentLang === 'ko' ? 'EN' : '한글';
     }
     
     // Update all text on page to match current language
