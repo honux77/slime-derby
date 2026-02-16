@@ -1028,14 +1028,13 @@ function onCanvasClick(e) {
     
     console.log(`Slime ${clickedSlime.name} clicked, cooldown: ${clickedSlime.fxCooldown}`);
     
-    // Trigger boost effect!
+    // Trigger awakening effect!
     if (clickedSlime.fxCooldown <= 0) {
-        console.log(`🚀 BOOST applied to ${clickedSlime.name}!`);
-        clickedSlime.fx = 'boost';
-        clickedSlime.fxTimer = 120;
-        clickedSlime.fxCooldown = 300;
-        clickedSlime.boostCount++;
-        spawnFxText(clickedSlime, t('boost'), '#00ff00');
+        console.log(`✨ AWAKENING applied to ${clickedSlime.name}!`);
+        clickedSlime.fx = 'awakening';
+        clickedSlime.fxTimer = 180;
+        clickedSlime.fxCooldown = 9999;
+        spawnFxText(clickedSlime, t('awakening'), '#ffd700');
         sfxBoost();
     } else {
         console.log(`⏳ Cooldown active: ${clickedSlime.fxCooldown} frames remaining`);
