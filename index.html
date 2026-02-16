@@ -1524,6 +1524,19 @@ function updateMobileCamera() {
     canvas.style.transformOrigin = 'left center';
 }
 
+// ── UI mapping for mobile (keep overlays fixed on screen) ──
+function getMobileUiContext() {
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = rect.width / CW;
+    const scaleY = rect.height / CH;
+    const map = (screenX, screenY) => ({
+        x: (screenX - rect.left) / scaleX,
+        y: (screenY - rect.top) / scaleY,
+    });
+    return { rect, map };
+}
+
 // ── Hop animation curve ──
 // t: 0→1 hop cycle, jumpH: max jump height in px
 // Returns { yOff (negative=up), sx, sy }
@@ -1560,6 +1573,7 @@ function getHopAnim(t, jumpH) {
 function render() {
     const w = CW, h = CH;
     ctx.clearRect(0, 0, w, h);
+    const uiCtx = isMobile ? getMobileUiContext() : null;
     
     // Stadium background (grass, stands, spectators, fences, track)
     renderStadium();
@@ -1589,7 +1603,14 @@ function render() {
         ctx.font = '11px "Press Start 2P"';
         ctx.fillStyle = '#ffdd00';
         ctx.textAlign = 'right';
-        ctx.fillText('TIME ' + el.toFixed(1) + 's', CW - 12, 16);
+        let timeX = CW - 12;
+        let timeY = 16;
+        if (uiCtx) {
+            const pos = uiCtx.map(uiCtx.rect.right - 12, uiCtx.rect.top + 16);
+            timeX = pos.x;
+            timeY = pos.y;
+        }
+        ctx.fillText('TIME ' + el.toFixed(1) + 's', timeX, timeY);
 
         // Ranking bar
         const sorted = [...players].sort((a,b) => b.pos - a.pos);
@@ -1713,12 +1734,22 @@ function render() {
         ctx.font = '64px "Press Start 2P"';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+        let cx = CW / 2;
+        let cy = CH / 2;
+        if (uiCtx) {
+            const pos = uiCtx.map(
+                uiCtx.rect.left + uiCtx.rect.width / 2,
+                uiCtx.rect.top + uiCtx.rect.height / 2
+            );
+            cx = pos.x;
+            cy = pos.y;
+        }
         if (cdValue > 0) {
             ctx.fillStyle = '#ffdd00';
-            ctx.fillText(cdValue, CW/2, CH/2);
+            ctx.fillText(cdValue, cx, cy);
         } else {
             ctx.fillStyle = '#58d854';
-            ctx.fillText('GO!', CW/2, CH/2);
+            ctx.fillText('GO!', cx, cy);
         }
         
         ctx.restore();
@@ -1737,7 +1768,17 @@ function render() {
         ctx.fillStyle = '#ffd700';
         ctx.shadowColor = '#ffd700';
         ctx.shadowBlur = 16;
-        ctx.fillText('FINISH!', CW/2, CH/2);
+        let fx = CW / 2;
+        let fy = CH / 2;
+        if (uiCtx) {
+            const pos = uiCtx.map(
+                uiCtx.rect.left + uiCtx.rect.width / 2,
+                uiCtx.rect.top + uiCtx.rect.height / 2
+            );
+            fx = pos.x;
+            fy = pos.y;
+        }
+        ctx.fillText('FINISH!', fx, fy);
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
         

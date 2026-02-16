@@ -44,6 +44,11 @@
 - Web Audio API
 - NES.css (8-bit 스타일)
 
+## 후원
+
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=github)](https://github.com/sponsors/honux77)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/honux77o)
+
 ## 📝 라이선스
 
 MIT License
