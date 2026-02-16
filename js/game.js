@@ -164,7 +164,7 @@ function updateRace() {
             chosen.fx = 'awakening';
             chosen.fxTimer = 180;
             chosen.fxCooldown = 9999;
-            spawnFxText(chosen, 'AWAKENING!', '#ffd700');
+            spawnFxText(chosen, t('awakening'), '#ffd700');
             sfxBoost();
             
             // Crowd goes wild with excitement!
@@ -235,12 +235,12 @@ function updateRace() {
                 p.fx = 'boost'; p.fxTimer = 55; p.fxCooldown = 120;
                 p.boostCount++;
                 sfxBoost();
-                spawnFxText(p, 'BOOST!', '#ffdd00');
+                spawnFxText(p, t('boost'), '#ffdd00');
             } else if (roll < 0.005) {
                 p.fx = 'trip'; p.fxTimer = 50; p.fxCooldown = 120;
                 p.tripCount++;
                 sfxTrip();
-                spawnFxText(p, 'TRIP!', '#ff4444');
+                spawnFxText(p, t('trip'), '#ff4444');
                 
                 if (p.hasAccessory && p.accessory) {
                     const px = TRACK_L + p.pos, py = p.y;
@@ -259,7 +259,7 @@ function updateRace() {
                 p.fx = 'sleep'; p.fxTimer = 80; p.fxCooldown = 120;
                 p.sleepCount++;
                 sfxSleep();
-                spawnFxText(p, 'Zzz..', '#88aaff');
+                spawnFxText(p, t('sleep'), '#88aaff');
             }
         }
 
@@ -390,10 +390,10 @@ function updateRace() {
             
             if (jf.p.fx === 'awakening') {
                 const awakeningCheers = [
-                    '역전의 명수!!', '대역전극!!', '믿을 수 없어!!', 
-                    '기적이다!!', '엄청난 각성!!', '전설의 역전!!',
-                    '이게 가능해?!', '완전 대박!!', '슈퍼 플레이!!',
-                    '말도 안돼!!', '감동이야!!', '이게 바로 각성!!'
+                    t('awakeningCheer1'), t('awakeningCheer2'), t('awakeningCheer3'), 
+                    t('awakeningCheer4'), t('awakeningCheer5'), t('awakeningCheer6'),
+                    t('awakeningCheer7'), t('awakeningCheer8'), t('awakeningCheer9'),
+                    t('awakeningCheer10'), t('awakeningCheer11'), t('awakeningCheer12')
                 ];
                 for (let i = 0; i < 15; i++) {
                     setTimeout(() => {
@@ -438,48 +438,48 @@ function updateRace() {
             if (finishOrder.length > 0) {
                 if (rand < 0.5) {
                     rp = finishOrder[0];
-                    cheers = ['{n} 우승이야!', '{n} 1등!!', '{n} 완주!!', '축하해 {n}!',
-                             '{n} 대단해!', '{n} 최고!!', '{n} 멋지다!', '{n} 승리!!'];
+                    cheers = [t('cheerWin1'), t('cheerWin2'), t('cheerWin3'), t('cheerWin4'),
+                             t('cheerWin5'), t('cheerWin6'), t('cheerWin7'), t('cheerWin8')];
                 } else if (rand < 0.75) {
                     rp = { name: '' };
-                    cheers = ['나 당첨이야!', '대박!!', '망했어..', '아 진짜ㅠㅠ', 
-                             '다맞췄다!', '완전 꽝..', '예상 적중!', '이럴수가ㅠ',
-                             '돈 날렸어', '역시 1등!', '아깝다!'];
+                    cheers = [t('cheerBet1'), t('cheerBet2'), t('cheerBet3'), t('cheerBet4'), 
+                             t('cheerBet5'), t('cheerBet6'), t('cheerBet7'), t('cheerBet8'),
+                             t('cheerBet9'), t('cheerBet10'), t('cheerBet11')];
                 } else {
                     const remaining = players.filter(p => !p.finished);
                     if (remaining.length > 0) {
                         rp = remaining[Math.floor(Math.random() * remaining.length)];
-                        cheers = ['{n} 힘내!', '{n} 포기마!', '할수있어 {n}!', '{n} 파이팅!', 
-                                 '{n} 달려!', '아자아자 {n}!'];
+                        cheers = [t('cheerEnc1'), t('cheerEnc2'), t('cheerEnc3'), t('cheerEnc4'), 
+                                 t('cheerEnc5'), t('cheerEnc6')];
                     } else {
                         rp = finishOrder[0];
-                        cheers = ['{n} 우승!!', '축하해 {n}!'];
+                        cheers = [t('cheerWin3'), t('cheerWin4')];
                     }
                 }
             } else if (elapsed / targetTime < 0.3) {
                 rp = players[Math.floor(Math.random() * players.length)];
-                cheers = ['{n} 화이팅!', '가자 {n}!', '{n} 힘내!', '달려 {n}!', '좋아 {n}!'];
+                cheers = [t('cheerEarly1'), t('cheerEarly2'), t('cheerEarly3'), t('cheerEarly4'), t('cheerEarly5')];
             } else if (elapsed / targetTime > 0.85) {
                 rp = sortedPlayers[0];
-                cheers = ['{n} 거의 다 왔어!', '{n} 1등이다!', '{n} 우승이야!', '{n} 완주!!', 
-                         '{n} 대단해!', '{n} 최고!!', '축하해 {n}!'];
+                cheers = [t('cheerLate1'), t('cheerLate2'), t('cheerLate3'), t('cheerLate4'), 
+                         t('cheerLate5'), t('cheerLate6'), t('cheerLate7')];
             } else if (rand < 0.4) {
                 const topIndex = Math.floor(Math.random() * Math.ceil(totalPlayers * 0.3));
                 rp = sortedPlayers[topIndex];
-                cheers = ['{n} 선두다!', '{n} 잘한다!', '{n} 최고!', '멋져 {n}!', 
-                         '{n} 계속 가!', '{n} 대단해!', '완벽해 {n}!'];
+                cheers = [t('cheerTop1'), t('cheerTop2'), t('cheerTop3'), t('cheerTop4'), 
+                         t('cheerTop5'), t('cheerTop6'), t('cheerTop7')];
             } else if (rand < 0.7) {
                 const bottomIndex = Math.floor(totalPlayers * 0.7 + Math.random() * Math.ceil(totalPlayers * 0.3));
                 rp = sortedPlayers[Math.min(bottomIndex, totalPlayers - 1)];
-                cheers = ['{n} 힘내!', '{n} 아직이야!', '{n} 포기마!', '할수있어 {n}!', 
-                         '{n} 파이팅!', '{n} 달려!', '아자아자 {n}!', '{n} 역전하자!'];
+                cheers = [t('cheerBottom1'), t('cheerBottom2'), t('cheerBottom3'), t('cheerBottom4'), 
+                         t('cheerBottom5'), t('cheerBottom6'), t('cheerBottom7'), t('cheerBottom8')];
             } else {
                 const midStart = Math.floor(totalPlayers * 0.3);
                 const midEnd = Math.floor(totalPlayers * 0.7);
                 const midIndex = midStart + Math.floor(Math.random() * (midEnd - midStart + 1));
                 rp = sortedPlayers[Math.min(midIndex, totalPlayers - 1)];
-                cheers = ['{n} 가자!', '{n} 화이팅!', '좋아 {n}!', '{n} 이겨라!', 
-                         '달려 {n}!', '{n} 올라가!'];
+                cheers = [t('cheerMid1'), t('cheerMid2'), t('cheerMid3'), t('cheerMid4'), 
+                         t('cheerMid5'), t('cheerMid6')];
             }
             
             const cheerColors = ['#c92a2a','#087f5b','#c2255c','#5f3dc4','#1864ab','#0b7285','#2b8a3e','#d9480f'];
