@@ -587,7 +587,12 @@ function adjustCanvasForFullscreen(isFullscreen) {
 function toggleLanguage() {
     const newLang = currentLang === 'ko' ? 'en' : 'ko';
     setLanguage(newLang);
-    document.getElementById('lang-text').textContent = newLang === 'ko' ? 'EN' : '한';
+    
+    // Update language button text (opposite of current language)
+    const langText = document.getElementById('lang-text');
+    if (langText) {
+        langText.textContent = newLang === 'ko' ? 'EN' : '한';
+    }
     
     // Update subtitle
     const subtitle = document.getElementById('subtitle-text');
@@ -638,11 +643,25 @@ function updateSetupLabels() {
 // Initialize language on load
 window.addEventListener('DOMContentLoaded', () => {
     loadLanguage();
+    
+    // Initialize language button text based on current language
     const langText = document.getElementById('lang-text');
     const langBtn = document.getElementById('lang-btn');
     if (langText) {
+        // If current is Korean, show 'EN' (to switch to English)
+        // If current is English, show '한' (to switch to Korean)
         langText.textContent = currentLang === 'ko' ? 'EN' : '한';
     }
+    
+    // Update all text on page to match current language
+    updateAllText();
+    
+    // Update subtitle on title screen
+    const subtitle = document.getElementById('subtitle-text');
+    if (subtitle) {
+        subtitle.textContent = currentLang === 'ko' ? '슬라임 경주로 순서를 정하자!' : 'Let\'s race to decide the order!';
+    }
+    
     // Show language button on title screen
     if (langBtn) {
         langBtn.style.display = 'flex';
