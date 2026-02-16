@@ -809,7 +809,7 @@ function render() {
                 ctx.stroke();
             }
             ctx.restore();
-        } else if (p.fx === 'awakening') {
+        } else if (p.fx === 'awakening' && !p.finished) {
             ctx.save();
             ctx.strokeStyle = 'rgba(255,215,0,0.7)';
             ctx.lineWidth = 3;
