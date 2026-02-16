@@ -969,10 +969,7 @@ function render() {
     ctx.textBaseline = 'alphabetic';
 }
 
-// ── Easter Egg: Double-click Slime for Boost ──
-let lastClickTime = 0;
-let lastClickedPlayer = null;
-
+// ── Easter Egg: Click Slime for Boost ──
 function getClickedSlime(clientX, clientY) {
     if (state !== 'racing') return null;
     
@@ -986,14 +983,14 @@ function getClickedSlime(clientX, clientY) {
     for (const p of players) {
         if (p.finished || p.dnf) continue;
         
-        const slimeX = TRACK_L + (p.pos / TRACK_LEN) * (CW - TRACK_L - 40);
+        const slimeX = TRACK_L + p.pos;
         const slimeY = p.y;
         const slimeSize = Math.min(p.laneH * 0.6, 40);
         
-        // Check if click is within slime bounds
+        // Check if click is within slime bounds (generous hitbox)
         const dx = x - slimeX;
         const dy = y - slimeY;
-        if (Math.abs(dx) < slimeSize && Math.abs(dy) < slimeSize / 2) {
+        if (Math.abs(dx) < slimeSize * 1.5 && Math.abs(dy) < slimeSize) {
             return p;
         }
     }
@@ -1004,26 +1001,14 @@ canvas.addEventListener('click', (e) => {
     const clickedSlime = getClickedSlime(e.clientX, e.clientY);
     if (!clickedSlime) return;
     
-    const now = Date.now();
-    const timeDiff = now - lastClickTime;
-    
-    // Double-click detected (within 500ms and same slime)
-    if (timeDiff < 500 && lastClickedPlayer === clickedSlime) {
-        // Trigger boost effect!
-        if (clickedSlime.fxCooldown <= 0) {
-            clickedSlime.fx = 'boost';
-            clickedSlime.fxTimer = 120;
-            clickedSlime.fxCooldown = 300;
-            clickedSlime.boostCount++;
-            spawnFxText(clickedSlime, t('boost'), '#00ff00');
-            sfxBoost();
-        }
-        lastClickedPlayer = null;
-        lastClickTime = 0;
-    } else {
-        // First click
-        lastClickedPlayer = clickedSlime;
-        lastClickTime = now;
+    // Trigger boost effect!
+    if (clickedSlime.fxCooldown <= 0) {
+        clickedSlime.fx = 'boost';
+        clickedSlime.fxTimer = 120;
+        clickedSlime.fxCooldown = 300;
+        clickedSlime.boostCount++;
+        spawnFxText(clickedSlime, t('boost'), '#00ff00');
+        sfxBoost();
     }
 });
 
