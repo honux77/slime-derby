@@ -871,7 +871,7 @@ function render() {
         let cy = CH / 2;
         if (uiCtx) {
             const pos = uiCtx.map(
-                uiCtx.rect.left + uiCtx.rect.width / 2 - 40,
+                uiCtx.rect.left + uiCtx.rect.width / 2 - 60,
                 uiCtx.rect.top + uiCtx.rect.height / 2
             );
             cx = pos.x;
@@ -902,9 +902,14 @@ function render() {
         ctx.shadowColor = '#ffd700';
         ctx.shadowBlur = 16;
         
-        // Always use actual canvas center (not mobile camera position)
-        const fx = CW / 2;
-        const fy = CH / 2;
+        let fx = CW / 2;
+        let fy = CH / 2;
+        
+        // On mobile, position at right side near finish line
+        if (uiCtx) {
+            fx = CW - 100;
+            fy = CH / 2;
+        }
         
         ctx.fillText('FINISH!', fx, fy);
         ctx.shadowBlur = 0;
