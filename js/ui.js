@@ -14,6 +14,12 @@ let timeRepeatInterval = null;
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    
+    // Show language button only on title screen
+    const langBtn = document.getElementById('lang-btn');
+    if (langBtn) {
+        langBtn.style.display = id === 'title-screen' ? 'flex' : 'none';
+    }
 }
 
 function showSetup() {
@@ -572,5 +578,13 @@ function toggleLanguage() {
 // Initialize language on load
 window.addEventListener('DOMContentLoaded', () => {
     loadLanguage();
-    document.getElementById('lang-text').textContent = currentLang === 'ko' ? 'EN' : '한';
+    const langText = document.getElementById('lang-text');
+    const langBtn = document.getElementById('lang-btn');
+    if (langText) {
+        langText.textContent = currentLang === 'ko' ? 'EN' : '한';
+    }
+    // Show language button on title screen
+    if (langBtn) {
+        langBtn.style.display = 'flex';
+    }
 });
