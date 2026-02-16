@@ -2045,7 +2045,40 @@ function drawSlime(x, y, size, sx, sy, color, crown, fx) {
     const eyeY = -rh * 0.08;
     const eww = size * 0.2, ewh = size * 0.26;
 
-    if (fx === 'trip') {
+    if (crown) {
+        // Winner eyes - 별 모양 눈 (★★)
+        ctx.fillStyle = '#ffdd00';
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 2;
+        const starSize = eww * 1.8;
+        
+        // Left star eye
+        ctx.save();
+        ctx.translate(-eyeOff, eyeY);
+        drawStar(0, 0, 5, starSize, starSize * 0.4);
+        ctx.restore();
+        
+        // Right star eye
+        ctx.save();
+        ctx.translate(eyeOff, eyeY);
+        drawStar(0, 0, 5, starSize, starSize * 0.4);
+        ctx.restore();
+        
+        // Sparkles around stars
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        const sparkles = [
+            {x: -eyeOff - starSize*1.2, y: eyeY - starSize*0.8, size: 3},
+            {x: -eyeOff + starSize*1.2, y: eyeY - starSize*0.5, size: 2.5},
+            {x: eyeOff - starSize*1.2, y: eyeY - starSize*0.8, size: 3},
+            {x: eyeOff + starSize*1.2, y: eyeY - starSize*0.5, size: 2.5},
+        ];
+        for (const sp of sparkles) {
+            ctx.beginPath();
+            ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+    } else if (fx === 'trip') {
         // X eyes
         ctx.strokeStyle = '#111';
         ctx.lineWidth = 2.5;
@@ -2164,6 +2197,32 @@ function drawSlime(x, y, size, sx, sy, color, crown, fx) {
         ctx.beginPath();
         ctx.arc(0, cy+cw*0.18, cw*0.12, 0, Math.PI*2);
         ctx.fill();
+        
+        // Victory hands (blinking effect)
+        const blink = Math.floor(performance.now() / 400) % 2 === 0;
+        if (blink) {
+            ctx.save();
+            ctx.font = `${size * 0.7}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Left victory hand
+            ctx.save();
+            ctx.translate(-rw * 1.5, -rh * 0.3);
+            ctx.rotate(-Math.PI / 8);
+            ctx.fillText('✌️', 0, 0);
+            ctx.restore();
+            
+            // Right victory hand
+            ctx.save();
+            ctx.translate(rw * 1.5, -rh * 0.3);
+            ctx.rotate(Math.PI / 8);
+            ctx.scale(-1, 1); // Mirror for right hand
+            ctx.fillText('✌️', 0, 0);
+            ctx.restore();
+            
+            ctx.restore();
+        }
     }
 
     ctx.restore();
@@ -2189,7 +2248,43 @@ function drawNESChar(x, y, size, sx, sy, charIdx, crown, fx) {
     ctx.drawImage(img, -w / 2, -h + size * 0.3, w, h);
 
     // ── Effect overlay on character ──
-    if (fx === 'trip') {
+    if (crown) {
+        // Winner eyes - 별 모양 눈 (★★)
+        const eyeY = -h * 0.65 + size * 0.3;
+        const eyeOff = size * 0.25;
+        
+        ctx.fillStyle = '#ffdd00';
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 2;
+        const starSize = size * 0.35;
+        
+        // Left star eye
+        ctx.save();
+        ctx.translate(-eyeOff, eyeY);
+        drawStar(0, 0, 5, starSize, starSize * 0.4);
+        ctx.restore();
+        
+        // Right star eye
+        ctx.save();
+        ctx.translate(eyeOff, eyeY);
+        drawStar(0, 0, 5, starSize, starSize * 0.4);
+        ctx.restore();
+        
+        // Sparkles around stars
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        const sparkles = [
+            {x: -eyeOff - starSize*1.2, y: eyeY - starSize*0.8, size: 3},
+            {x: -eyeOff + starSize*1.2, y: eyeY - starSize*0.5, size: 2.5},
+            {x: eyeOff - starSize*1.2, y: eyeY - starSize*0.8, size: 3},
+            {x: eyeOff + starSize*1.2, y: eyeY - starSize*0.5, size: 2.5},
+        ];
+        for (const sp of sparkles) {
+            ctx.beginPath();
+            ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+    } else if (fx === 'trip') {
         // X eyes overlay
         ctx.strokeStyle = '#ff0000';
         ctx.lineWidth = 3;
@@ -2271,6 +2366,32 @@ function drawNESChar(x, y, size, sx, sy, charIdx, crown, fx) {
         ctx.beginPath();
         ctx.arc(0, cy + cw * 0.18, cw * 0.12, 0, Math.PI * 2);
         ctx.fill();
+        
+        // Victory hands (blinking effect)
+        const blink = Math.floor(performance.now() / 400) % 2 === 0;
+        if (blink) {
+            ctx.save();
+            ctx.font = `${size * 0.7}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Left victory hand
+            ctx.save();
+            ctx.translate(-rw * 1.5, -rh * 0.3 - size * 0.3);
+            ctx.rotate(-Math.PI / 8);
+            ctx.fillText('✌️', 0, 0);
+            ctx.restore();
+            
+            // Right victory hand
+            ctx.save();
+            ctx.translate(rw * 1.5, -rh * 0.3 - size * 0.3);
+            ctx.rotate(Math.PI / 8);
+            ctx.scale(-1, 1); // Mirror for right hand
+            ctx.fillText('✌️', 0, 0);
+            ctx.restore();
+            
+            ctx.restore();
+        }
     }
 
     ctx.restore();
