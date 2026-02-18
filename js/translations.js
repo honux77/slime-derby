@@ -159,6 +159,28 @@ const TRANSLATIONS = {
         awakeningMoment15: '저파워!!',
         awakeningMoment16: '대단해!!',
         
+        // UI
+        subtitle: '슬라임 경주로 순서를 정하자!',
+        fullscreenToggle: '풀스크린 토글',
+        fullscreenExit: '풀스크린 종료',
+        langChange: '언어 변경',
+        playerPlaceholder: '참가자',
+        enjoyedGame: '재밌으셨나요?',
+        buyCoffee: '☕ 커피 한 잔 사주기!',
+
+        // NES Character Names
+        nesName1: '마리오',
+        nesName2: '사토시',
+        nesName3: '커비',
+        nesName4: '이상해씨',
+        nesName5: '파이리',
+        nesName6: '꼬부기',
+        nesName7: '몬스터볼',
+        nesName8: '옥토캣',
+
+        // Easter Egg
+        krillinCheer: '크리링...',
+
         // Default Names
         defaultName1: '초록이',
         defaultName2: '파랑이',
@@ -204,11 +226,11 @@ const TRANSLATIONS = {
         go: 'GO!',
         finish: 'FINISH',
         
-        // Effects (한글로!)
-        boost: '부스트!',
-        trip: '꽈당!',
-        sleep: '졸려..',
-        awakening: '프리더!',
+        // Effects
+        boost: 'BOOST!',
+        trip: 'TRIP!',
+        sleep: 'Zzz..',
+        awakening: 'AWAKENING!',
         
         // Results
         resultsTitle: 'RACE RESULTS',
@@ -326,6 +348,28 @@ const TRANSLATIONS = {
         awakeningMoment15: 'Such Power!!',
         awakeningMoment16: 'Awesome!!',
         
+        // UI
+        subtitle: 'Let\'s race to decide the order!',
+        fullscreenToggle: 'Toggle Fullscreen',
+        fullscreenExit: 'Exit Fullscreen',
+        langChange: 'Change Language',
+        playerPlaceholder: 'Player',
+        enjoyedGame: 'Enjoyed the game?',
+        buyCoffee: '☕ Buy me a coffee!',
+
+        // NES Character Names
+        nesName1: 'Mario',
+        nesName2: 'Ash',
+        nesName3: 'Kirby',
+        nesName4: 'Bulbasaur',
+        nesName5: 'Charmander',
+        nesName6: 'Squirtle',
+        nesName7: 'Pokeball',
+        nesName8: 'Octocat',
+
+        // Easter Egg
+        krillinCheer: 'Krillin.. TT',
+
         // Default Names
         defaultName1: 'Green',
         defaultName2: 'Blue',
@@ -347,6 +391,7 @@ function t(key) {
 function setLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('slimeDerbyLang', lang);
+    document.documentElement.lang = lang;
     updateAllText();
 }
 
@@ -359,27 +404,25 @@ function loadLanguage() {
 
 function updateAllText() {
     // Update title screen
-    const titleBtn = document.querySelector('#title-screen button:nth-child(2)');
-    if (titleBtn) titleBtn.textContent = t('start');
-    const setupBtn = document.querySelector('#title-screen button:nth-child(3)');
-    if (setupBtn) setupBtn.textContent = t('setup');
-    
+    const startBtn = document.getElementById('start-btn');
+    if (startBtn) startBtn.textContent = t('start');
+
+    const subtitle = document.getElementById('subtitle-text');
+    if (subtitle) subtitle.textContent = t('subtitle');
+
     // Update setup screen
-    const setupTitle = document.querySelector('#setup-screen h2');
+    const setupTitle = document.getElementById('setup-title');
     if (setupTitle) setupTitle.textContent = t('setupTitle');
-    
+
     // Update draw screen
-    const drawTitle = document.querySelector('#draw-screen h2');
+    const drawTitle = document.getElementById('draw-title');
     if (drawTitle) drawTitle.textContent = t('drawTitle');
-    
+    const drawStartBtn = document.getElementById('draw-start-btn');
+    if (drawStartBtn) drawStartBtn.textContent = t('startRace');
+
     // Update results screen
-    const resultsTitle = document.querySelector('#result-screen h2');
-    if (resultsTitle) resultsTitle.textContent = t('resultsTitle');
-    
-    // Re-render if needed
-    if (state === 'setup') {
-        // Trigger setup screen refresh if available
-    }
+    const resultTitle = document.getElementById('result-title');
+    if (resultTitle) resultTitle.textContent = t('resultsTitle');
 }
 
 function getDefaultNames() {

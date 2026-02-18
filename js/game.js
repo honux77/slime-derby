@@ -401,7 +401,7 @@ function updateRace() {
                     t('awakeningCheer4'), t('awakeningCheer5'), t('awakeningCheer6'),
                     t('awakeningCheer7'), t('awakeningCheer8'), t('awakeningCheer9'),
                     t('awakeningCheer10'), t('awakeningCheer11'), t('awakeningCheer12'),
-                    '크리링.. ㅜㅜ', '크리링.. ㅜㅜ', '크리링.. ㅜㅜ'  // Easter egg
+                    t('krillinCheer'), t('krillinCheer'), t('krillinCheer')  // Easter egg
                 ];
                 for (let i = 0; i < 15; i++) {
                     setTimeout(() => {

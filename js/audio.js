@@ -87,7 +87,7 @@ function preRenderNESChars() {
     container.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
     document.body.appendChild(container);
 
-    for (const ch of NES_CHARS) {
+    for (const ch of getNESChars()) {
         const el = document.createElement('i');
         el.className = ch.cls;
         container.appendChild(el);

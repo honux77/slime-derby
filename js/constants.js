@@ -31,16 +31,17 @@ function getLocalizedDefaultNames() {
     return DEFAULT_NAMES;
 }
 
-const NES_CHARS = [
-    { cls: 'nes-mario', name: '마리오' },
-    { cls: 'nes-ash', name: '사토시' },
-    { cls: 'nes-kirby', name: '커비' },
-    { cls: 'nes-bulbasaur', name: '이상해씨' },
-    { cls: 'nes-charmander', name: '파이리' },
-    { cls: 'nes-squirtle', name: '꼬부기' },
-    { cls: 'nes-pokeball', name: '몬스터볼' },
-    { cls: 'nes-octocat', name: '옥토캣' },
+const NES_CHARS_CLS = [
+    'nes-mario', 'nes-ash', 'nes-kirby', 'nes-bulbasaur',
+    'nes-charmander', 'nes-squirtle', 'nes-pokeball', 'nes-octocat',
 ];
+
+function getNESChars() {
+    return NES_CHARS_CLS.map((cls, i) => ({
+        cls,
+        name: typeof t === 'function' ? t(`nesName${i + 1}`) : cls,
+    }));
+}
 
 // Accessory types (head accessories only)
 const ACCESSORIES = [

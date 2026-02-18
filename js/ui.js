@@ -235,7 +235,8 @@ function buildPlayerInputs() {
     for (let i = 0; i < count; i++) {
         const row = document.createElement('div');
         row.className = 'player-row';
-        const placeholder = i < 8 && playerCount <= 8 ? DEFAULT_NAMES[i] : `참가자${i + 1}`;
+        const localNames = getLocalizedDefaultNames();
+        const placeholder = i < 8 && playerCount <= 8 ? localNames[i] : `${t('playerPlaceholder')}${i + 1}`;
         const dot = playerCount <= 8
             ? `<div class="color-dot" style="background:${SLIME_COLORS[i].hex}"></div>` : '';
         row.innerHTML = `
@@ -310,6 +311,11 @@ function showResults() {
     
     showScreen('result-screen');
     playVictoryMusic();
+    updateResultLabels();
+
+    // Update result title
+    const resultTitle = document.getElementById('result-title');
+    if (resultTitle) resultTitle.textContent = t('resultsTitle');
 
     const snapshotDiv = document.getElementById('finish-snapshot');
     if (finishSnapshot) {
@@ -540,11 +546,11 @@ document.addEventListener('fullscreenchange', () => {
     const btn = document.getElementById('fullscreen-btn');
     if (document.fullscreenElement) {
         btn.textContent = '⛶';
-        btn.title = '풀스크린 종료';
+        btn.title = t('fullscreenExit');
         adjustCanvasForFullscreen(true);
     } else {
         btn.textContent = '⛶';
-        btn.title = '풀스크린 토글';
+        btn.title = t('fullscreenToggle');
         adjustCanvasForFullscreen(false);
     }
 });
@@ -593,29 +599,47 @@ function toggleLanguage() {
     // Update language button text (opposite of current language)
     const langText = document.getElementById('lang-text');
     if (langText) {
-        langText.textContent = newLang === 'ko' ? 'EN' : '한글';
+        langText.textContent = newLang === 'ko' ? 'EN' : 'KO';
     }
-    
+
     // Update subtitle
     const subtitle = document.getElementById('subtitle-text');
     if (subtitle) {
-        subtitle.textContent = newLang === 'ko' ? '슬라임 경주로 순서를 정하자!' : 'Let\'s race to decide the order!';
+        subtitle.textContent = t('subtitle');
     }
-    
+
     // Update start button
     const startBtn = document.getElementById('start-btn');
     if (startBtn) {
-        startBtn.textContent = 'PRESS START';
+        startBtn.textContent = t('start');
     }
-    
+
     // Update setup screen labels
     updateSetupLabels();
-    
+
+    // Update fullscreen button tooltip
+    const fsBtn = document.getElementById('fullscreen-btn');
+    if (fsBtn) {
+        fsBtn.title = document.fullscreenElement ? t('fullscreenExit') : t('fullscreenToggle');
+    }
+
+    // Update language button tooltip
+    const langBtn = document.getElementById('lang-btn');
+    if (langBtn) {
+        langBtn.title = t('langChange');
+    }
+
     // Update draw notice
     const drawNoticeText = document.getElementById('draw-notice-text');
     if (drawNoticeText) {
         drawNoticeText.textContent = t('drawNotice');
     }
+
+    // Update result screen text
+    updateResultLabels();
+
+    // Rebuild player inputs to update placeholders
+    buildPlayerInputs();
 }
 
 function updateSetupLabels() {
@@ -642,6 +666,22 @@ function updateSetupLabels() {
     }
 }
 
+function updateResultLabels() {
+    const enjoyText = document.getElementById('result-enjoy-text');
+    if (enjoyText) enjoyText.textContent = t('enjoyedGame');
+    const coffeeLink = document.getElementById('result-coffee-link');
+    if (coffeeLink) coffeeLink.textContent = t('buyCoffee');
+    const downloadBtn = document.getElementById('result-download-btn');
+    if (downloadBtn) {
+        downloadBtn.querySelector('.btn-full').textContent = '📥 ' + t('downloadImage');
+        downloadBtn.querySelector('.btn-mobile').textContent = '📥';
+    }
+    const setupBtn = document.getElementById('result-setup-btn');
+    if (setupBtn) setupBtn.textContent = t('backToSetup');
+    const rematchBtn = document.getElementById('result-rematch-btn');
+    if (rematchBtn) rematchBtn.textContent = t('newRace');
+}
+
 // Initialize language on load
 window.addEventListener('DOMContentLoaded', () => {
     loadLanguage();
@@ -650,22 +690,35 @@ window.addEventListener('DOMContentLoaded', () => {
     const langText = document.getElementById('lang-text');
     const langBtn = document.getElementById('lang-btn');
     if (langText) {
-        // If current is Korean, show 'EN' (to switch to English)
-        // If current is English, show '한글' (to switch to Korean)
-        langText.textContent = currentLang === 'ko' ? 'EN' : '한글';
+        langText.textContent = currentLang === 'ko' ? 'EN' : 'KO';
     }
-    
+
     // Update all text on page to match current language
     updateAllText();
-    
+    updateSetupLabels();
+    updateResultLabels();
+
     // Update subtitle on title screen
     const subtitle = document.getElementById('subtitle-text');
     if (subtitle) {
-        subtitle.textContent = currentLang === 'ko' ? '슬라임 경주로 순서를 정하자!' : 'Let\'s race to decide the order!';
+        subtitle.textContent = t('subtitle');
     }
-    
-    // Show language button on title screen
+
+    // Update start button
+    const startBtn = document.getElementById('start-btn');
+    if (startBtn) {
+        startBtn.textContent = t('start');
+    }
+
+    // Update fullscreen button tooltip
+    const fsBtn = document.getElementById('fullscreen-btn');
+    if (fsBtn) {
+        fsBtn.title = t('fullscreenToggle');
+    }
+
+    // Update language button tooltip
     if (langBtn) {
+        langBtn.title = t('langChange');
         langBtn.style.display = 'flex';
     }
 });

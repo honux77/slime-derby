@@ -36,10 +36,10 @@
 <body>
 <div id="app">
     <!-- Fullscreen Toggle Button -->
-    <button id="fullscreen-btn" onclick="toggleFullscreen()" title="풀스크린 토글">Full</button>
-    
+    <button id="fullscreen-btn" onclick="toggleFullscreen()" title="">Full</button>
+
     <!-- Language Toggle Button -->
-    <button id="lang-btn" onclick="toggleLanguage()" title="언어 변경 / Change Language">
+    <button id="lang-btn" onclick="toggleLanguage()" title="">
         <span id="lang-text">EN</span>
     </button>
 
@@ -50,8 +50,8 @@
             <div class="title-shadow"></div>
         </div>
         <h1>SLIME<br>DERBY</h1>
-        <p class="subtitle" id="subtitle-text">슬라임 경주로 순서를 정하자!</p>
-        <button class="btn primary blink" onclick="showSetup()" id="start-btn">PRESS START</button>
+        <p class="subtitle" id="subtitle-text"></p>
+        <button class="btn primary blink" onclick="showSetup()" id="start-btn"></button>
         <div class="visitor-counter">
             <img src="https://hits.sh/honux77.github.io/slime-derby.svg?label=Visitors&color=58d854&labelColor=0a0a1a" alt="Visitor Counter">
         </div>
@@ -59,9 +59,9 @@
 
     <!-- Setup -->
     <div id="setup-screen" class="screen">
-        <h2 id="setup-title">RACE SETUP</h2>
+        <h2 id="setup-title"></h2>
         <div class="setup-row">
-            <span class="setup-label" id="label-total-players">총 슬라임 수</span>
+            <span class="setup-label" id="label-total-players"></span>
             <div class="count-controls">
                 <button class="count-btn" onclick="setCountMin()" style="font-size:10px;width:auto;padding:0 8px;" id="btn-min-1">MIN</button>
                 <button class="count-btn" onmousedown="startCountRepeat(-1)" onmouseup="stopCountRepeat()" onmouseleave="stopCountRepeat()" ontouchstart="startCountRepeat(-1)" ontouchend="stopCountRepeat()" ontouchcancel="stopCountRepeat()">-</button>
@@ -71,7 +71,7 @@
             </div>
         </div>
         <div class="setup-row">
-            <span class="setup-label" id="label-racing-players">레이싱 참가 슬라임 수</span>
+            <span class="setup-label" id="label-racing-players"></span>
             <div class="count-controls">
                 <button class="count-btn" onclick="setRaceCountMin()" style="font-size:10px;width:auto;padding:0 8px;" id="btn-min-2">MIN</button>
                 <button class="count-btn" onmousedown="startRaceCountRepeat(-1)" onmouseup="stopRaceCountRepeat()" onmouseleave="stopRaceCountRepeat()" ontouchstart="startRaceCountRepeat(-1)" ontouchend="stopRaceCountRepeat()" ontouchcancel="stopRaceCountRepeat()">-</button>
@@ -82,16 +82,14 @@
         </div>
         <div class="setup-row" id="draw-notice" style="display:none; margin-top:-8px; margin-bottom:4px;">
             <span class="setup-label"></span>
-            <div style="font-size:9px; color:#ffdd00; line-height:1.5;" id="draw-notice-text">
-                ※ 랜덤 추첨 화면이 표시됩니다
-            </div>
+            <div style="font-size:9px; color:#ffdd00; line-height:1.5;" id="draw-notice-text"></div>
         </div>
         <div class="setup-row">
             <span class="setup-label"></span>
             <label class="sd-checkbox">
                 <input type="checkbox" id="use-names" onchange="buildPlayerInputs();saveSetup()">
                 <span class="sd-check-box"></span>
-                <span id="label-use-names">이름 입력</span>
+                <span id="label-use-names"></span>
             </label>
         </div>
         <div class="setup-row">
@@ -107,12 +105,12 @@
             <label class="sd-checkbox">
                 <input type="checkbox" id="early-finish" checked onchange="saveSetup()">
                 <span class="sd-check-box"></span>
-                <span id="label-early-finish">조기 종료</span>
+                <span id="label-early-finish"></span>
             </label>
         </div>
         <div class="player-list" id="player-list"></div>
         <div class="setup-row">
-            <span class="setup-label" id="label-race-time">레이스 시간</span>
+            <span class="setup-label" id="label-race-time"></span>
             <div class="count-controls">
                 <button class="count-btn" onclick="setTimeMin()" style="font-size:10px;width:auto;padding:0 8px;" id="btn-min-3">MIN</button>
                 <button class="count-btn" onmousedown="startTimeRepeat(-1)" onmouseup="stopTimeRepeat()" onmouseleave="stopTimeRepeat()" ontouchstart="startTimeRepeat(-1)" ontouchend="stopTimeRepeat()" ontouchcancel="stopTimeRepeat()">-</button>
@@ -130,10 +128,10 @@
 
     <!-- Draw (selection) -->
     <div id="select-screen" class="screen">
-        <h2 id="draw-title">RANDOM DRAW</h2>
-        <p class="draw-sub" id="draw-subtitle">총 <span id="draw-total">0</span>명 중 <span id="draw-selected" style="color:var(--green)">0</span>명 선발!</p>
+        <h2 id="draw-title"></h2>
+        <p class="draw-sub" id="draw-subtitle"></p>
         <div class="draw-grid" id="draw-grid"></div>
-        <button class="btn primary" onclick="beginRace()" style="margin-top:12px;font-size:14px" id="draw-start-btn">START RACE!</button>
+        <button class="btn primary" onclick="beginRace()" style="margin-top:12px;font-size:14px" id="draw-start-btn"></button>
     </div>
 
     <!-- Game -->
@@ -143,13 +141,13 @@
 
     <!-- Results -->
     <div id="result-screen" class="screen">
-        <h2>FINISH!</h2>
+        <h2 id="result-title"></h2>
         <div id="finish-snapshot" style="margin-bottom: 16px;"></div>
         <div class="results-list" id="results-list"></div>
         <div style="margin: 12px 0; font-size: 10px; color: #888; line-height: 1.8;">
-            Enjoyed the game?
+            <span id="result-enjoy-text"></span>
             <br>
-            <a href="https://buymeacoffee.com/honux77o" target="_blank" style="color: #FFDD00; text-decoration: none; font-weight: bold;">☕ Buy me a coffee!</a>
+            <a id="result-coffee-link" href="https://buymeacoffee.com/honux77o" target="_blank" style="color: #FFDD00; text-decoration: none; font-weight: bold;"></a>
             <br>
             <a href="https://github.com/honux77/slime-derby" target="_blank" style="color: #58d854; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px;">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -159,9 +157,9 @@
             </a>
         </div>
         <div class="btn-group">
-            <button class="btn" onclick="downloadResults()"><span class="btn-full">📥 DOWNLOAD</span><span class="btn-mobile">📥</span></button>
-            <button class="btn" onclick="showSetup()">SETUP</button>
-            <button class="btn primary" onclick="startRace()">REMATCH</button>
+            <button class="btn" onclick="downloadResults()" id="result-download-btn"><span class="btn-full">📥</span><span class="btn-mobile">📥</span></button>
+            <button class="btn" onclick="showSetup()" id="result-setup-btn"></button>
+            <button class="btn primary" onclick="startRace()" id="result-rematch-btn"></button>
         </div>
     </div>
 </div>
