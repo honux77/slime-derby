@@ -79,6 +79,72 @@ function sfxBoost() {
 }
 function sfxTrip() { tone(300,.08); setTimeout(()=>tone(180,.15,'sawtooth'),80); }
 function sfxSleep() { tone(220,.2,'sine',0.04); }
+function sfxAwakening() {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+
+        // Phase 1: Rising swoosh (슈우우욱) - sawtooth sweep 80Hz → 1200Hz
+        const swoosh = audioCtx.createOscillator();
+        const swooshGain = audioCtx.createGain();
+        swoosh.type = 'sawtooth';
+        swoosh.frequency.setValueAtTime(80, now);
+        swoosh.frequency.exponentialRampToValueAtTime(1200, now + 0.45);
+        swooshGain.gain.setValueAtTime(0.18, now);
+        swooshGain.gain.linearRampToValueAtTime(0.25, now + 0.3);
+        swooshGain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        swoosh.connect(swooshGain);
+        swooshGain.connect(audioCtx.destination);
+        swoosh.start(now);
+        swoosh.stop(now + 0.55);
+
+        // Phase 2: Impact boom (쾅) - low sine thump
+        const boom = audioCtx.createOscillator();
+        const boomGain = audioCtx.createGain();
+        boom.type = 'sine';
+        boom.frequency.setValueAtTime(60, now + 0.4);
+        boom.frequency.exponentialRampToValueAtTime(30, now + 0.85);
+        boomGain.gain.setValueAtTime(0.001, now);
+        boomGain.gain.linearRampToValueAtTime(0.35, now + 0.42);
+        boomGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+        boom.connect(boomGain);
+        boomGain.connect(audioCtx.destination);
+        boom.start(now + 0.38);
+        boom.stop(now + 0.9);
+
+        // Phase 3: White noise burst for impact texture
+        const bufferSize = audioCtx.sampleRate * 0.3;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * 0.5;
+        }
+        const noise = audioCtx.createBufferSource();
+        const noiseGain = audioCtx.createGain();
+        noise.buffer = noiseBuffer;
+        noiseGain.gain.setValueAtTime(0.001, now);
+        noiseGain.gain.linearRampToValueAtTime(0.15, now + 0.42);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+        noise.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+        noise.start(now + 0.35);
+        noise.stop(now + 0.7);
+
+        // Bonus: high shimmer ring for dramatic flair
+        const shimmer = audioCtx.createOscillator();
+        const shimmerGain = audioCtx.createGain();
+        shimmer.type = 'sine';
+        shimmer.frequency.setValueAtTime(1800, now + 0.42);
+        shimmer.frequency.exponentialRampToValueAtTime(600, now + 0.9);
+        shimmerGain.gain.setValueAtTime(0.001, now);
+        shimmerGain.gain.linearRampToValueAtTime(0.08, now + 0.44);
+        shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+        shimmer.connect(shimmerGain);
+        shimmerGain.connect(audioCtx.destination);
+        shimmer.start(now + 0.42);
+        shimmer.stop(now + 0.9);
+    } catch(e) {}
+}
 
 // Pre-render NES character sprites
 function preRenderNESChars() {

@@ -3,7 +3,7 @@
    ========================================================= */
 
 // Utility functions
-function pick(a) { return a[Math.floor(Math.random()*a.length)]; }
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 
 function pickRandom(total, k) {
     const set = new Set();
@@ -54,7 +54,7 @@ function startRace() {
     if (playerCount === racePlayerCount) {
         players = [];
         for (let i = 0; i < playerCount; i++) {
-            const name = nameMap[i] || `#${i+1}`;
+            const name = nameMap[i] || `#${i + 1}`;
             players.push(makePlayer(name, i));
         }
         beginRace();
@@ -77,7 +77,7 @@ function beginRace() {
         preRenderNESChars();
         // Randomly assign NES characters: pick random subset, random positions
         const charCount = NES_CHARS_CLS.length;
-        const indices = Array.from({length: charCount}, (_, i) => i);
+        const indices = Array.from({ length: charCount }, (_, i) => i);
         // Shuffle available character indices
         for (let i = indices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -87,7 +87,7 @@ function beginRace() {
         const maxNes = Math.min(players.length, charCount);
         const nesCount = Math.max(1, Math.floor(Math.random() * maxNes) + 1);
         // Pick random player positions
-        const playerIndices = Array.from({length: players.length}, (_, i) => i);
+        const playerIndices = Array.from({ length: players.length }, (_, i) => i);
         for (let i = playerIndices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [playerIndices[i], playerIndices[j]] = [playerIndices[j], playerIndices[i]];
@@ -103,10 +103,10 @@ function beginRace() {
     ctx = canvas.getContext('2d');
     canvas.width = CW; canvas.height = CH;
     ctx.imageSmoothingEnabled = false;
-    
+
     isMobile = window.innerWidth <= 768;
     cameraX = 0;
-    
+
     if (isMobile) {
         const scale = 2.0;
         const ratio = window.innerWidth / CW;
@@ -134,7 +134,7 @@ function beginRace() {
 
     finishOrder = []; pace = 1; frame = 0; particles = []; droppedAccessories = []; finishSnapshot = null; surgeTriggered = false;
     showScreen('game-screen');
-    
+
     // Add click listener for easter egg (only once)
     if (!clickListenerAdded && canvas) {
         canvas.addEventListener('click', onCanvasClick);
@@ -182,7 +182,7 @@ function updateRace() {
     // Awakening event at 50% time
     if (!surgeTriggered && elapsed >= targetTime * 0.5) {
         surgeTriggered = true;
-        
+
         if (Math.random() < 0.25) {
             const sorted = [...players].sort((a, b) => a.pos - b.pos);
             const bottomCount = Math.max(1, Math.floor(players.length * 0.3));
@@ -192,7 +192,7 @@ function updateRace() {
             chosen.fxTimer = 220;
             chosen.fxCooldown = 9999;
             spawnFxText(chosen, t('awakening'), '#ffd700');
-            sfxBoost();
+            sfxAwakening();
 
             // Slime speech bubble (immediate)
             const speeches = [t('awakeningSpeech1'), t('awakeningSpeech2'), t('awakeningSpeech3')];
@@ -214,7 +214,7 @@ function updateRace() {
                 t('awakeningMoment9'), t('awakeningMoment10'), t('awakeningMoment11'), t('awakeningMoment12'),
                 t('awakeningMoment13'), t('awakeningMoment14'), t('awakeningMoment15'), t('awakeningMoment16')
             ];
-            
+
             // Spawn many crowd cheers rapidly
             for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
@@ -268,7 +268,7 @@ function updateRace() {
             p.fxTimer--;
             if (p.fxTimer <= 0) p.fx = null;
         }
-        
+
         const prog = p.pos / TRACK_LEN;
         if (!p.fx && p.fxCooldown <= 0 && prog > 0.08 && prog < 0.88) {
             const roll = Math.random();
@@ -282,7 +282,7 @@ function updateRace() {
                 p.tripCount++;
                 sfxTrip();
                 spawnFxText(p, t('trip'), '#ff4444');
-                
+
                 if (p.hasAccessory && p.accessory) {
                     const px = TRACK_L + p.pos, py = p.y;
                     particles.push({
@@ -319,52 +319,58 @@ function updateRace() {
         // Effect particles
         const px = TRACK_L + p.pos, py = p.y;
         if (p.fx === 'boost' && frame % 3 === 0) {
-            particles.push({ x: px-10, y: py+(Math.random()-0.5)*8,
-                vx: -3-Math.random()*3, vy: 0, size: 1.5+Math.random()*2,
-                life: 10, maxLife: 10, color: '#ffdd00', grav: false });
+            particles.push({
+                x: px - 10, y: py + (Math.random() - 0.5) * 8,
+                vx: -3 - Math.random() * 3, vy: 0, size: 1.5 + Math.random() * 2,
+                life: 10, maxLife: 10, color: '#ffdd00', grav: false
+            });
         }
         if (p.fx === 'awakening' && frame % 2 === 0) {
             const ang = Math.random() * Math.PI * 2;
             const dist = 10 + Math.random() * 8;
-            particles.push({ 
-                x: px + Math.cos(ang) * dist, 
+            particles.push({
+                x: px + Math.cos(ang) * dist,
                 y: py + Math.sin(ang) * dist,
-                vx: Math.cos(ang) * 0.5, 
+                vx: Math.cos(ang) * 0.5,
                 vy: Math.sin(ang) * 0.5,
-                size: 2 + Math.random() * 2, 
-                life: 20, 
-                maxLife: 20, 
-                color: '#ffd700', 
-                grav: false 
-            });
-            particles.push({ 
-                x: px - 15, 
-                y: py + (Math.random() - 0.5) * 12,
-                vx: -4 - Math.random() * 4, 
-                vy: 0, 
                 size: 2 + Math.random() * 2,
-                life: 8, 
-                maxLife: 8, 
-                color: '#ffaa00', 
-                grav: false 
+                life: 20,
+                maxLife: 20,
+                color: '#ffd700',
+                grav: false
+            });
+            particles.push({
+                x: px - 15,
+                y: py + (Math.random() - 0.5) * 12,
+                vx: -4 - Math.random() * 4,
+                vy: 0,
+                size: 2 + Math.random() * 2,
+                life: 8,
+                maxLife: 8,
+                color: '#ffaa00',
+                grav: false
             });
         }
         if (p.fx === 'trip' && p.fxTimer > 30 && frame % 6 === 0) {
             for (let s = 0; s < 2; s++) {
                 const ang = Math.random() * Math.PI * 2;
-                particles.push({ x: px+Math.cos(ang)*12, y: py-14+Math.sin(ang)*6,
-                    vx: Math.cos(ang)*0.3, vy: Math.sin(ang)*0.3,
-                    size: 1.5, life: 14, maxLife: 14, color: '#ffff44', grav: false });
+                particles.push({
+                    x: px + Math.cos(ang) * 12, y: py - 14 + Math.sin(ang) * 6,
+                    vx: Math.cos(ang) * 0.3, vy: Math.sin(ang) * 0.3,
+                    size: 1.5, life: 14, maxLife: 14, color: '#ffff44', grav: false
+                });
             }
         }
         if (p.fx === 'sleep' && frame % 15 === 0) {
-            particles.push({ x: px+6, y: py-12,
-                vx: 0.3+Math.random()*0.3, vy: -0.6-Math.random()*0.4,
-                size: 0, life: 40, maxLife: 40, color: '#88aaff', grav: false, text: 'Z' });
+            particles.push({
+                x: px + 6, y: py - 12,
+                vx: 0.3 + Math.random() * 0.3, vy: -0.6 - Math.random() * 0.4,
+                size: 0, life: 40, maxLife: 40, color: '#88aaff', grav: false, text: 'Z'
+            });
         }
 
         // Rubber band
-        const avg = players.reduce((s,q) => s + q.pos, 0) / players.length / TRACK_LEN;
+        const avg = players.reduce((s, q) => s + q.pos, 0) / players.length / TRACK_LEN;
         const my = p.pos / TRACK_LEN;
         const rubber = 1 + (avg - my) * 0.1;
 
@@ -388,9 +394,9 @@ function updateRace() {
         if (justLanded) {
             for (let d = 0; d < 4; d++) {
                 particles.push({
-                    x: TRACK_L + p.pos + (Math.random()-0.5)*10,
+                    x: TRACK_L + p.pos + (Math.random() - 0.5) * 10,
                     y: p.y + p.laneH * 0.18,
-                    vx: (Math.random()-0.5)*2.5, vy: -Math.random()*1.5,
+                    vx: (Math.random() - 0.5) * 2.5, vy: -Math.random() * 1.5,
                     size: 2 + Math.random() * 2.5,
                     life: 16, maxLife: 16,
                     color: p.color.light, grav: false,
@@ -425,7 +431,7 @@ function updateRace() {
     for (const jf of justFinished) {
         jf.p.rank = finishOrder.length;
         finishOrder.push(jf.p);
-        
+
         if (finishOrder.length === 1 && !finishSnapshot) {
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
@@ -433,10 +439,10 @@ function updateRace() {
                 });
             });
             if (earlyFinish) earlyFinishTime = performance.now();
-            
+
             if (jf.p.fx === 'awakening') {
                 const awakeningCheers = [
-                    t('awakeningCheer1'), t('awakeningCheer2'), t('awakeningCheer3'), 
+                    t('awakeningCheer1'), t('awakeningCheer2'), t('awakeningCheer3'),
                     t('awakeningCheer4'), t('awakeningCheer5'), t('awakeningCheer6'),
                     t('awakeningCheer7'), t('awakeningCheer8'), t('awakeningCheer9'),
                     t('awakeningCheer10'), t('awakeningCheer11'), t('awakeningCheer12'),
@@ -445,7 +451,7 @@ function updateRace() {
                 for (let i = 0; i < 15; i++) {
                     setTimeout(() => {
                         const text = pick(awakeningCheers);
-                        const cheerColors = ['#ffd700','#ffaa00','#ff8800','#ffdd00'];
+                        const cheerColors = ['#ffd700', '#ffaa00', '#ff8800', '#ffdd00'];
                         particles.push({
                             x: TRACK_L + 40 + Math.random() * (TRACK_LEN - 100),
                             y: CROWD_Y + Math.random() * 30,
@@ -461,14 +467,14 @@ function updateRace() {
                 }
             }
         }
-        
+
         sfxCross();
         for (let i = 0; i < 20; i++) {
             particles.push({
                 x: TRACK_R, y: jf.p.y,
-                vx: (Math.random()-0.5)*6, vy: -Math.random()*5-1,
-                size: 2+Math.random()*3, life: 50, maxLife: 50,
-                color: ['#ffd700','#ff4444','#fff','#58d854',jf.p.color.hex][Math.floor(Math.random()*5)],
+                vx: (Math.random() - 0.5) * 6, vy: -Math.random() * 5 - 1,
+                size: 2 + Math.random() * 3, life: 50, maxLife: 50,
+                color: ['#ffd700', '#ff4444', '#fff', '#58d854', jf.p.color.hex][Math.floor(Math.random() * 5)],
                 grav: true,
             });
         }
@@ -480,26 +486,26 @@ function updateRace() {
         if (Math.random() < cheerRate) {
             const sortedPlayers = [...players].sort((a, b) => b.pos - a.pos);
             const totalPlayers = players.length;
-            
+
             let rp, cheers;
             const rand = Math.random();
-            
+
             if (finishOrder.length > 0) {
                 if (rand < 0.5) {
                     rp = finishOrder[0];
                     cheers = [t('cheerWin1'), t('cheerWin2'), t('cheerWin3'), t('cheerWin4'),
-                             t('cheerWin5'), t('cheerWin6'), t('cheerWin7'), t('cheerWin8')];
+                    t('cheerWin5'), t('cheerWin6'), t('cheerWin7'), t('cheerWin8')];
                 } else if (rand < 0.75) {
                     rp = { name: '' };
-                    cheers = [t('cheerBet1'), t('cheerBet2'), t('cheerBet3'), t('cheerBet4'), 
-                             t('cheerBet5'), t('cheerBet6'), t('cheerBet7'), t('cheerBet8'),
-                             t('cheerBet9'), t('cheerBet10'), t('cheerBet11')];
+                    cheers = [t('cheerBet1'), t('cheerBet2'), t('cheerBet3'), t('cheerBet4'),
+                    t('cheerBet5'), t('cheerBet6'), t('cheerBet7'), t('cheerBet8'),
+                    t('cheerBet9'), t('cheerBet10'), t('cheerBet11')];
                 } else {
                     const remaining = players.filter(p => !p.finished);
                     if (remaining.length > 0) {
                         rp = remaining[Math.floor(Math.random() * remaining.length)];
-                        cheers = [t('cheerEnc1'), t('cheerEnc2'), t('cheerEnc3'), t('cheerEnc4'), 
-                                 t('cheerEnc5'), t('cheerEnc6')];
+                        cheers = [t('cheerEnc1'), t('cheerEnc2'), t('cheerEnc3'), t('cheerEnc4'),
+                        t('cheerEnc5'), t('cheerEnc6')];
                     } else {
                         rp = finishOrder[0];
                         cheers = [t('cheerWin3'), t('cheerWin4')];
@@ -510,28 +516,28 @@ function updateRace() {
                 cheers = [t('cheerEarly1'), t('cheerEarly2'), t('cheerEarly3'), t('cheerEarly4'), t('cheerEarly5')];
             } else if (elapsed / targetTime > 0.85) {
                 rp = sortedPlayers[0];
-                cheers = [t('cheerLate1'), t('cheerLate2'), t('cheerLate3'), t('cheerLate4'), 
-                         t('cheerLate5'), t('cheerLate6'), t('cheerLate7')];
+                cheers = [t('cheerLate1'), t('cheerLate2'), t('cheerLate3'), t('cheerLate4'),
+                t('cheerLate5'), t('cheerLate6'), t('cheerLate7')];
             } else if (rand < 0.4) {
                 const topIndex = Math.floor(Math.random() * Math.ceil(totalPlayers * 0.3));
                 rp = sortedPlayers[topIndex];
-                cheers = [t('cheerTop1'), t('cheerTop2'), t('cheerTop3'), t('cheerTop4'), 
-                         t('cheerTop5'), t('cheerTop6'), t('cheerTop7')];
+                cheers = [t('cheerTop1'), t('cheerTop2'), t('cheerTop3'), t('cheerTop4'),
+                t('cheerTop5'), t('cheerTop6'), t('cheerTop7')];
             } else if (rand < 0.7) {
                 const bottomIndex = Math.floor(totalPlayers * 0.7 + Math.random() * Math.ceil(totalPlayers * 0.3));
                 rp = sortedPlayers[Math.min(bottomIndex, totalPlayers - 1)];
-                cheers = [t('cheerBottom1'), t('cheerBottom2'), t('cheerBottom3'), t('cheerBottom4'), 
-                         t('cheerBottom5'), t('cheerBottom6'), t('cheerBottom7'), t('cheerBottom8')];
+                cheers = [t('cheerBottom1'), t('cheerBottom2'), t('cheerBottom3'), t('cheerBottom4'),
+                t('cheerBottom5'), t('cheerBottom6'), t('cheerBottom7'), t('cheerBottom8')];
             } else {
                 const midStart = Math.floor(totalPlayers * 0.3);
                 const midEnd = Math.floor(totalPlayers * 0.7);
                 const midIndex = midStart + Math.floor(Math.random() * (midEnd - midStart + 1));
                 rp = sortedPlayers[Math.min(midIndex, totalPlayers - 1)];
-                cheers = [t('cheerMid1'), t('cheerMid2'), t('cheerMid3'), t('cheerMid4'), 
-                         t('cheerMid5'), t('cheerMid6')];
+                cheers = [t('cheerMid1'), t('cheerMid2'), t('cheerMid3'), t('cheerMid4'),
+                t('cheerMid5'), t('cheerMid6')];
             }
-            
-            const cheerColors = ['#c92a2a','#087f5b','#c2255c','#5f3dc4','#1864ab','#0b7285','#2b8a3e','#d9480f'];
+
+            const cheerColors = ['#c92a2a', '#087f5b', '#c2255c', '#5f3dc4', '#1864ab', '#0b7285', '#2b8a3e', '#d9480f'];
             const text = pick(cheers).replace('{n}', rp.name);
             const isTop = Math.random() > 0.5;
             particles.push({
@@ -550,11 +556,11 @@ function updateRace() {
     for (let i = particles.length - 1; i >= 0; i--) {
         const pt = particles[i];
         pt.life--;
-        if (pt.grav) { 
-            pt.x += pt.vx; 
-            pt.y += pt.vy; 
+        if (pt.grav) {
+            pt.x += pt.vx;
+            pt.y += pt.vy;
             pt.vy += 0.12;
-            
+
             if (pt.isAccessory && pt.accessoryType) {
                 const groundY = CH - CROWD_H - 10;
                 if (pt.y >= groundY) {
@@ -569,7 +575,7 @@ function updateRace() {
                 }
             }
         }
-        else { pt.x += pt.vx||0; pt.y += pt.vy||0; }
+        else { pt.x += pt.vx || 0; pt.y += pt.vy || 0; }
         if (pt.life <= 0) particles.splice(i, 1);
     }
 
@@ -600,7 +606,7 @@ function updateRace() {
 // Mobile camera
 function updateMobileCamera() {
     if (!isMobile || (state !== 'racing' && state !== 'countdown' && state !== 'finished') || !canvas) return;
-    
+
     let leader = null;
     let maxPos = -1;
     for (const p of players) {
@@ -609,9 +615,9 @@ function updateMobileCamera() {
             leader = p;
         }
     }
-    
+
     if (!leader) return;
-    
+
     const scale = 2.0;
     const ratio = window.innerWidth / CW;
     const leaderPx = (TRACK_L + leader.pos) * ratio;
@@ -619,13 +625,13 @@ function updateMobileCamera() {
     const maxOffset = 0;
     const minOffset = (window.innerWidth / scale) - (TRACK_R * ratio) - 10;
     let clamped = Math.max(minOffset, Math.min(maxOffset, targetOffset));
-    
+
     if (Math.abs(cameraX - clamped) > 1) {
         cameraX += (clamped - cameraX) * 0.15;
     } else {
         cameraX = clamped;
     }
-    
+
     canvas.style.transform = `scale(${scale}) translateX(${cameraX}px)`;
     canvas.style.transformOrigin = 'left center';
 }
@@ -674,7 +680,7 @@ function render() {
     const w = CW, h = CH;
     ctx.clearRect(0, 0, w, h);
     const uiCtx = isMobile ? getMobileUiContext() : null;
-    
+
     renderStadium();
 
     // Header bar
@@ -697,7 +703,7 @@ function render() {
     if (state === 'racing' || state === 'finished') {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        
+
         const el = (performance.now() - raceStart) / 1000;
         ctx.font = '11px "Press Start 2P", "DungGeunMo"';
         ctx.fillStyle = '#ffdd00';
@@ -712,17 +718,17 @@ function render() {
         ctx.fillText('TIME ' + el.toFixed(1) + 's', timeX, timeY);
 
         // Ranking bar
-        const sorted = [...players].sort((a,b) => b.pos - a.pos);
+        const sorted = [...players].sort((a, b) => b.pos - a.pos);
         ctx.font = '7px "Press Start 2P", "DungGeunMo"';
         ctx.textAlign = 'left';
         let rx = 12;
         for (let i = 0; i < Math.min(sorted.length, 6); i++) {
             ctx.fillStyle = sorted[i].color.hex;
-            ctx.fillText(`${i+1}.${sorted[i].name}`, rx, 36);
-            rx += ctx.measureText(`${i+1}.${sorted[i].name}`).width + 14;
+            ctx.fillText(`${i + 1}.${sorted[i].name}`, rx, 36);
+            rx += ctx.measureText(`${i + 1}.${sorted[i].name}`).width + 14;
             if (rx > CW - 60) break;
         }
-        
+
         ctx.restore();
     }
 
@@ -735,7 +741,7 @@ function render() {
             ctx.globalAlpha = a * 0.8;
             ctx.fillStyle = pt.color;
             ctx.beginPath();
-            ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI*2);
+            ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
             ctx.fill();
         }
     }
@@ -773,7 +779,7 @@ function render() {
             sqX = hop.sx;
             sqY = hop.sy;
         }
-        
+
         let drawColor = p.color;
         if (p.fx === 'boost') {
             const flash = Math.sin(frame * 0.5) > 0;
@@ -784,65 +790,78 @@ function render() {
             drawColor = { hex: '#ffd700', dark: '#ffaa00', light: '#ffee88' };
         }
         const isWinner = finishOrder.length > 0 && finishOrder[0] === p;
-        
+
         // Awakening aura
         if (p.fx === 'awakening') {
             ctx.save();
-            const pulseScale = 1 + Math.sin(frame * 0.3) * 0.15;
-            const baseSize = sz * 1.5;
-            const spikeCount = 12;
+            const pulseScale = 1 + Math.sin(frame * 0.3) * 0.2;
+            const baseSize = sz * 2.5;
+            const spikeCount = 14;
             const angleStep = (Math.PI * 2) / spikeCount;
-            
+
+            // Outer glow layer (large, soft)
+            const outerGlow = ctx.createRadialGradient(sx, sy, sz * 0.5, sx, sy, sz * 3.5);
+            outerGlow.addColorStop(0, 'rgba(255, 215, 0, 0.15)');
+            outerGlow.addColorStop(0.5, 'rgba(255, 170, 0, 0.08)');
+            outerGlow.addColorStop(1, 'rgba(255, 170, 0, 0)');
+            ctx.fillStyle = outerGlow;
+            ctx.beginPath();
+            ctx.arc(sx, sy, sz * 3.5 * pulseScale, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Outer spikes
             ctx.fillStyle = 'rgba(255, 170, 0, 0.3)';
             ctx.beginPath();
             for (let i = 0; i < spikeCount; i++) {
                 const angle = angleStep * i + frame * 0.05;
-                const spikeLen = baseSize * (1.5 + Math.sin(angle * 3 + frame * 0.1) * 0.3) * pulseScale;
+                const spikeLen = baseSize * (2.0 + Math.sin(angle * 3 + frame * 0.1) * 0.4) * pulseScale;
                 const baseLen = baseSize * 0.8;
-                
+
                 if (i === 0) {
-                    ctx.moveTo(sx + Math.cos(angle - angleStep / 2) * baseLen, 
-                              sy + Math.sin(angle - angleStep / 2) * baseLen);
+                    ctx.moveTo(sx + Math.cos(angle - angleStep / 2) * baseLen,
+                        sy + Math.sin(angle - angleStep / 2) * baseLen);
                 }
-                ctx.lineTo(sx + Math.cos(angle) * spikeLen, 
-                          sy + Math.sin(angle) * spikeLen);
-                ctx.lineTo(sx + Math.cos(angle + angleStep / 2) * baseLen, 
-                          sy + Math.sin(angle + angleStep / 2) * baseLen);
+                ctx.lineTo(sx + Math.cos(angle) * spikeLen,
+                    sy + Math.sin(angle) * spikeLen);
+                ctx.lineTo(sx + Math.cos(angle + angleStep / 2) * baseLen,
+                    sy + Math.sin(angle + angleStep / 2) * baseLen);
             }
             ctx.closePath();
             ctx.fill();
-            
+
+            // Inner spikes (offset rotation)
             ctx.fillStyle = 'rgba(255, 215, 0, 0.4)';
             ctx.beginPath();
             for (let i = 0; i < spikeCount; i++) {
                 const angle = angleStep * i + angleStep / 2 + frame * 0.05;
-                const spikeLen = baseSize * (1.2 + Math.sin(angle * 2 + frame * 0.15) * 0.3) * pulseScale;
+                const spikeLen = baseSize * (1.6 + Math.sin(angle * 2 + frame * 0.15) * 0.35) * pulseScale;
                 const baseLen = baseSize * 0.6;
-                
+
                 if (i === 0) {
-                    ctx.moveTo(sx + Math.cos(angle - angleStep / 2) * baseLen, 
-                              sy + Math.sin(angle - angleStep / 2) * baseLen);
+                    ctx.moveTo(sx + Math.cos(angle - angleStep / 2) * baseLen,
+                        sy + Math.sin(angle - angleStep / 2) * baseLen);
                 }
-                ctx.lineTo(sx + Math.cos(angle) * spikeLen, 
-                          sy + Math.sin(angle) * spikeLen);
-                ctx.lineTo(sx + Math.cos(angle + angleStep / 2) * baseLen, 
-                          sy + Math.sin(angle + angleStep / 2) * baseLen);
+                ctx.lineTo(sx + Math.cos(angle) * spikeLen,
+                    sy + Math.sin(angle) * spikeLen);
+                ctx.lineTo(sx + Math.cos(angle + angleStep / 2) * baseLen,
+                    sy + Math.sin(angle + angleStep / 2) * baseLen);
             }
             ctx.closePath();
             ctx.fill();
-            
-            const coreGradient = ctx.createRadialGradient(sx, sy, 0, sx, sy, sz * 1.0);
-            coreGradient.addColorStop(0, 'rgba(255, 255, 200, 0.4)');
-            coreGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.3)');
+
+            // Core glow gradient
+            const coreGradient = ctx.createRadialGradient(sx, sy, 0, sx, sy, sz * 1.5);
+            coreGradient.addColorStop(0, 'rgba(255, 255, 200, 0.5)');
+            coreGradient.addColorStop(0.4, 'rgba(255, 215, 0, 0.35)');
             coreGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
             ctx.fillStyle = coreGradient;
             ctx.beginPath();
-            ctx.arc(sx, sy, sz * 1.0, 0, Math.PI * 2);
+            ctx.arc(sx, sy, sz * 1.5, 0, Math.PI * 2);
             ctx.fill();
-            
+
             ctx.restore();
         }
-        
+
         // Manga effects
         if (p.fx === 'boost') {
             ctx.save();
@@ -896,7 +915,7 @@ function render() {
             }
             ctx.restore();
         }
-        
+
         if (p.fx === 'sleep') ctx.globalAlpha = 0.55;
         if (useNESChars && p.nesCharIdx >= 0) {
             drawNESChar(sx, sy + bY, sz, sqX, sqY, p.nesCharIdx, isWinner, p.fx);
@@ -910,7 +929,7 @@ function render() {
     if (state === 'countdown') {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        
+
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         ctx.fillRect(0, 0, CW, CH);
         ctx.font = '64px "Press Start 2P", "DungGeunMo"';
@@ -933,7 +952,7 @@ function render() {
             ctx.fillStyle = '#58d854';
             ctx.fillText('GO!', cx, cy);
         }
-        
+
         ctx.restore();
     }
 
@@ -941,8 +960,8 @@ function render() {
     if (state === 'finished') {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        
-        const pulse = 0.8 + Math.sin(performance.now()/200) * 0.2;
+
+        const pulse = 0.8 + Math.sin(performance.now() / 200) * 0.2;
         ctx.globalAlpha = pulse;
         ctx.font = '28px "Press Start 2P", "DungGeunMo"';
         ctx.textAlign = 'center';
@@ -950,20 +969,20 @@ function render() {
         ctx.fillStyle = '#ffd700';
         ctx.shadowColor = '#ffd700';
         ctx.shadowBlur = 16;
-        
+
         let fx = CW / 2;
         let fy = CH / 2;
-        
+
         // On mobile, position at right side near finish line
         if (uiCtx) {
             fx = CW - 100;
             fy = CH / 2;
         }
-        
+
         ctx.fillText('FINISH!', fx, fy);
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
-        
+
         ctx.restore();
     }
 
@@ -981,7 +1000,7 @@ function render() {
         } else if (pt.text) {
             const a = pt.life / pt.maxLife;
             ctx.globalAlpha = a * 0.9;
-            
+
             let fs;
             if (pt.text === 'Z') {
                 fs = 16;
@@ -991,7 +1010,7 @@ function render() {
                 ctx.font = `bold ${fs}px "Press Start 2P", "DungGeunMo"`;
             }
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            
+
             if (pt.isSpeechBubble) {
                 const metrics = ctx.measureText(pt.text);
                 const textW = metrics.width;
@@ -999,9 +1018,9 @@ function render() {
                 const padding = 4;
                 const bubbleW = textW + padding * 2;
                 const bubbleH = textH + padding * 2;
-                
+
                 ctx.fillStyle = '#fff';
-                
+
                 // Awakening cheers get golden border
                 if (pt.isAwakeningCheer) {
                     ctx.strokeStyle = '#ffd700';
@@ -1010,13 +1029,13 @@ function render() {
                     ctx.strokeStyle = '#000';
                     ctx.lineWidth = 2;
                 }
-                
+
                 ctx.beginPath();
-                ctx.roundRect(pt.x - bubbleW/2, pt.y - bubbleH/2, bubbleW, bubbleH, 3);
+                ctx.roundRect(pt.x - bubbleW / 2, pt.y - bubbleH / 2, bubbleW, bubbleH, 3);
                 ctx.fill();
                 ctx.stroke();
             }
-            
+
             ctx.fillStyle = pt.color;
             ctx.fillText(pt.text, pt.x, pt.y);
         }
@@ -1033,21 +1052,21 @@ let lastClickedPlayer = null;
 
 function getClickedSlime(clientX, clientY) {
     if (state !== 'racing') return null;
-    
+
     const rect = canvas.getBoundingClientRect();
     const scaleX = CW / rect.width;
     const scaleY = CH / rect.height;
     const x = (clientX - rect.left) * scaleX;
     const y = (clientY - rect.top) * scaleY;
-    
+
     // Check each player
     for (const p of players) {
         if (p.finished || p.dnf) continue;
-        
+
         const slimeX = TRACK_L + p.pos;
         const slimeY = p.y;
         const slimeSize = Math.min(p.laneH * 0.6, 40);
-        
+
         // Check if click is within slime bounds (generous hitbox)
         const dx = x - slimeX;
         const dy = y - slimeY;
@@ -1061,10 +1080,10 @@ function getClickedSlime(clientX, clientY) {
 function onCanvasClick(e) {
     const clickedSlime = getClickedSlime(e.clientX, e.clientY);
     if (!clickedSlime) return;
-    
+
     const now = Date.now();
     const timeDiff = now - lastClickTime;
-    
+
     // Double-click detected (within 500ms and same slime)
     if (timeDiff < 500 && lastClickedPlayer === clickedSlime) {
         // Trigger awakening effect!
@@ -1073,7 +1092,7 @@ function onCanvasClick(e) {
             clickedSlime.fxTimer = 220;
             clickedSlime.fxCooldown = 9999;
             spawnFxText(clickedSlime, t('awakening'), '#ffd700');
-            sfxBoost();
+            sfxAwakening();
 
             // Slime speech bubble (immediate)
             const speeches = [t('awakeningSpeech1'), t('awakeningSpeech2'), t('awakeningSpeech3')];
@@ -1095,7 +1114,7 @@ function onCanvasClick(e) {
                 t('awakeningMoment9'), t('awakeningMoment10'), t('awakeningMoment11'), t('awakeningMoment12'),
                 t('awakeningMoment13'), t('awakeningMoment14'), t('awakeningMoment15'), t('awakeningMoment16')
             ];
-            
+
             // Spawn many crowd cheers rapidly
             for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
