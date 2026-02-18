@@ -1,7 +1,7 @@
 {
   "name": "SLIME DERBY",
   "short_name": "SlimeDerby",
-  "description": "귀여운 슬라임들의 레이싱 게임! 슬라임을 선택해서 경주에서 우승하세요",
+  "description": "귀여운 슬라임들의 레이싱 게임! 어떤 슬라임이 우승할 수 있을까요?",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#0f0f23",

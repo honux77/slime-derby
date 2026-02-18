@@ -116,7 +116,7 @@ function drawTrack() {
         ctx.fillStyle = p.color.hex;
         ctx.fillRect(3, p.laneTop + 3, 4, p.laneH - 6);
         const fontSize = Math.min(9, p.laneH * 0.22);
-        ctx.font = fontSize + 'px "Press Start 2P"';
+        ctx.font = fontSize + 'px "Press Start 2P", "DungGeunMo"';
         ctx.fillStyle = '#ddd';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';

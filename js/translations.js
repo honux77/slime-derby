@@ -158,7 +158,12 @@ const TRANSLATIONS = {
         awakeningMoment14: '오라가!!',
         awakeningMoment15: '저파워!!',
         awakeningMoment16: '대단해!!',
-        
+
+        // Awakening Slime Speech
+        awakeningSpeech1: '프리더! 나 화났다!',
+        awakeningSpeech2: '이제부터 진심이다!',
+        awakeningSpeech3: '각오해라!!',
+
         // UI
         subtitle: '슬라임 경주로 순서를 정하자!',
         fullscreenToggle: '풀스크린 토글',
@@ -347,7 +352,12 @@ const TRANSLATIONS = {
         awakeningMoment14: 'That Aura!!',
         awakeningMoment15: 'Such Power!!',
         awakeningMoment16: 'Awesome!!',
-        
+
+        // Awakening Slime Speech
+        awakeningSpeech1: 'Frieza! I\'m angry!',
+        awakeningSpeech2: 'I\'m serious now!',
+        awakeningSpeech3: 'Get ready!!',
+
         // UI
         subtitle: 'Let\'s race to decide the order!',
         fullscreenToggle: 'Toggle Fullscreen',

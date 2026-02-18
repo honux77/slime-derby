@@ -28,17 +28,16 @@ function makePlayer(name, colorIdx) {
         accessory: accessory,
         hasAccessory: accessory !== null,
         boostCount: 0, tripCount: 0, sleepCount: 0,
+        nesCharIdx: -1,
     };
 }
 
 // Start race sequence
 function startRace() {
-    playerCount = Math.max(2, Math.min(1000,
+    playerCount = Math.max(2, Math.min(999,
         parseInt(document.getElementById('player-count').value) || 4));
     document.getElementById('player-count').value = playerCount;
-    racePlayerCount = Math.max(2, Math.min(15, Math.min(playerCount,
-        parseInt(document.getElementById('race-count').value) || 4)));
-    document.getElementById('race-count').value = racePlayerCount;
+    racePlayerCount = Math.min(15, playerCount);
     targetTime = Math.max(3, Math.min(60,
         parseInt(document.getElementById('time-input').value) || 10));
     const useNames = document.getElementById('use-names').checked;
@@ -74,7 +73,29 @@ function startRace() {
 // Begin race after setup
 function beginRace() {
     useNESChars = document.getElementById('use-nes-chars').checked;
-    if (useNESChars) preRenderNESChars();
+    if (useNESChars) {
+        preRenderNESChars();
+        // Randomly assign NES characters: pick random subset, random positions
+        const charCount = NES_CHARS_CLS.length;
+        const indices = Array.from({length: charCount}, (_, i) => i);
+        // Shuffle available character indices
+        for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        // Randomly decide how many NES chars to use (at least 1, up to min(players, chars))
+        const maxNes = Math.min(players.length, charCount);
+        const nesCount = Math.max(1, Math.floor(Math.random() * maxNes) + 1);
+        // Pick random player positions
+        const playerIndices = Array.from({length: players.length}, (_, i) => i);
+        for (let i = playerIndices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [playerIndices[i], playerIndices[j]] = [playerIndices[j], playerIndices[i]];
+        }
+        for (let i = 0; i < nesCount; i++) {
+            players[playerIndices[i]].nesCharIdx = indices[i];
+        }
+    }
     earlyFinish = document.getElementById('early-finish').checked;
     earlyFinishTime = 0;
 
@@ -168,11 +189,24 @@ function updateRace() {
             const underdogs = sorted.slice(0, bottomCount);
             const chosen = underdogs[Math.floor(Math.random() * underdogs.length)];
             chosen.fx = 'awakening';
-            chosen.fxTimer = 180;
+            chosen.fxTimer = 220;
             chosen.fxCooldown = 9999;
             spawnFxText(chosen, t('awakening'), '#ffd700');
             sfxBoost();
-            
+
+            // Slime speech bubble (immediate)
+            const speeches = [t('awakeningSpeech1'), t('awakeningSpeech2'), t('awakeningSpeech3')];
+            const speech = speeches[Math.floor(Math.random() * speeches.length)];
+            particles.push({
+                x: TRACK_L + chosen.pos + 20, y: chosen.y - 30,
+                vx: 0, vy: -0.15,
+                text: speech, size: 14,
+                life: 120, maxLife: 120,
+                color: '#ff4444', grav: false,
+                isSpeechBubble: true,
+                isAwakeningCheer: true,
+            });
+
             // Crowd goes wild with excitement!
             const crowdCheers = [
                 t('awakeningMoment1'), t('awakeningMoment2'), t('awakeningMoment3'), t('awakeningMoment4'),
@@ -238,8 +272,8 @@ function updateRace() {
         const prog = p.pos / TRACK_LEN;
         if (!p.fx && p.fxCooldown <= 0 && prog > 0.08 && prog < 0.88) {
             const roll = Math.random();
-            if (roll < 0.003) {
-                p.fx = 'boost'; p.fxTimer = 55; p.fxCooldown = 120;
+            if (roll < 0.002) {
+                p.fx = 'boost'; p.fxTimer = 40; p.fxCooldown = 150;
                 p.boostCount++;
                 sfxBoost();
                 spawnFxText(p, t('boost'), '#ffdd00');
@@ -272,10 +306,15 @@ function updateRace() {
 
         // Effect speed modifier
         let fxMult = 1;
-        if (p.fx === 'boost') fxMult = 2.0;
+        if (p.fx === 'boost') fxMult = 1.7;
         else if (p.fx === 'trip') fxMult = (p.fxTimer > 35) ? 0.0 : (50 - p.fxTimer) / 50;
         else if (p.fx === 'sleep') fxMult = 0.25;
-        else if (p.fx === 'awakening') fxMult = 6.3;
+        else if (p.fx === 'awakening') {
+            const awakeningElapsed = 220 - p.fxTimer;
+            if (awakeningElapsed < 40) fxMult = 0.0;       // pause phase
+            else if (awakeningElapsed < 55) fxMult = 2.0;   // ramp up
+            else fxMult = 6.3;                               // full burst
+        }
 
         // Effect particles
         const px = TRACK_L + p.pos, py = p.y;
@@ -647,7 +686,7 @@ function render() {
     // Title
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.font = '12px "Press Start 2P"';
+    ctx.font = '12px "Press Start 2P", "DungGeunMo"';
     ctx.fillStyle = '#58d854';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
@@ -660,7 +699,7 @@ function render() {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         
         const el = (performance.now() - raceStart) / 1000;
-        ctx.font = '11px "Press Start 2P"';
+        ctx.font = '11px "Press Start 2P", "DungGeunMo"';
         ctx.fillStyle = '#ffdd00';
         ctx.textAlign = 'right';
         let timeX = CW - 12;
@@ -674,7 +713,7 @@ function render() {
 
         // Ranking bar
         const sorted = [...players].sort((a,b) => b.pos - a.pos);
-        ctx.font = '7px "Press Start 2P"';
+        ctx.font = '7px "Press Start 2P", "DungGeunMo"';
         ctx.textAlign = 'left';
         let rx = 12;
         for (let i = 0; i < Math.min(sorted.length, 6); i++) {
@@ -859,8 +898,8 @@ function render() {
         }
         
         if (p.fx === 'sleep') ctx.globalAlpha = 0.55;
-        if (useNESChars && i < 8) {
-            drawNESChar(sx, sy + bY, sz, sqX, sqY, i, isWinner, p.fx);
+        if (useNESChars && p.nesCharIdx >= 0) {
+            drawNESChar(sx, sy + bY, sz, sqX, sqY, p.nesCharIdx, isWinner, p.fx);
         } else {
             drawSlime(sx, sy + bY, sz, sqX, sqY, drawColor, isWinner, p.fx, p.accessory, p.hasAccessory);
         }
@@ -874,7 +913,7 @@ function render() {
         
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         ctx.fillRect(0, 0, CW, CH);
-        ctx.font = '64px "Press Start 2P"';
+        ctx.font = '64px "Press Start 2P", "DungGeunMo"';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         let cx = CW / 2;
@@ -905,7 +944,7 @@ function render() {
         
         const pulse = 0.8 + Math.sin(performance.now()/200) * 0.2;
         ctx.globalAlpha = pulse;
-        ctx.font = '28px "Press Start 2P"';
+        ctx.font = '28px "Press Start 2P", "DungGeunMo"';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#ffd700';
@@ -946,10 +985,10 @@ function render() {
             let fs;
             if (pt.text === 'Z') {
                 fs = 16;
-                ctx.font = `bold ${fs}px "Press Start 2P"`;
+                ctx.font = `bold ${fs}px "Press Start 2P", "DungGeunMo"`;
             } else {
                 fs = pt.text.length > 5 ? 9 : pt.text.length > 2 ? 11 : 13;
-                ctx.font = `bold ${fs}px "Press Start 2P"`;
+                ctx.font = `bold ${fs}px "Press Start 2P", "DungGeunMo"`;
             }
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             
@@ -1031,11 +1070,24 @@ function onCanvasClick(e) {
         // Trigger awakening effect!
         if (clickedSlime.fxCooldown <= 0) {
             clickedSlime.fx = 'awakening';
-            clickedSlime.fxTimer = 180;
+            clickedSlime.fxTimer = 220;
             clickedSlime.fxCooldown = 9999;
             spawnFxText(clickedSlime, t('awakening'), '#ffd700');
             sfxBoost();
-            
+
+            // Slime speech bubble (immediate)
+            const speeches = [t('awakeningSpeech1'), t('awakeningSpeech2'), t('awakeningSpeech3')];
+            const speech = speeches[Math.floor(Math.random() * speeches.length)];
+            particles.push({
+                x: TRACK_L + clickedSlime.pos + 20, y: clickedSlime.y - 30,
+                vx: 0, vy: -0.15,
+                text: speech, size: 14,
+                life: 120, maxLife: 120,
+                color: '#ff4444', grav: false,
+                isSpeechBubble: true,
+                isAwakeningCheer: true,
+            });
+
             // Crowd goes wild with excitement!
             const crowdCheers = [
                 t('awakeningMoment1'), t('awakeningMoment2'), t('awakeningMoment3'), t('awakeningMoment4'),

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:cdn.jsdelivr.net)",
+      "WebSearch",
+      "WebFetch(domain:www.cdnfonts.com)"
+    ]
+  }
+}

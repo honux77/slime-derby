@@ -12,7 +12,7 @@
         /* Override NES.css global resets */
         label { display: inline; margin-bottom: 0; }
         body {
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P', 'DungGeunMo', monospace;
             background: var(--bg);
             color: var(--white);
             min-height: 100vh;
@@ -102,7 +102,7 @@
 
         /* ===== Buttons ===== */
         .btn {
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P', 'DungGeunMo', monospace;
             font-size: 12px; padding: 14px 28px;
             background: var(--panel); color: var(--white);
             border: 3px solid var(--white);
@@ -141,7 +141,7 @@
             display: flex; align-items: center; gap: 10px;
         }
         .count-btn {
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P', 'DungGeunMo', monospace;
             font-size: 18px; width: 36px; height: 36px;
             background: var(--panel); color: var(--white);
             border: 3px solid var(--white);
@@ -150,7 +150,7 @@
         }
         .count-btn:hover { background: var(--white); color: var(--bg); }
         #player-count, #race-count, #time-input {
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P', 'DungGeunMo', monospace;
             font-size: 16px; width: 76px; text-align: center;
             background: var(--panel); color: var(--white);
             border: 2px solid var(--border); outline: none;
@@ -176,7 +176,7 @@
         }
         .player-num { font-size: 9px; min-width: 20px; }
         .sd-input {
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P', 'DungGeunMo', monospace;
             font-size: 9px; padding: 7px 10px;
             background: #0a0a0a; color: var(--white);
             border: 2px solid #444; outline: none;
@@ -249,10 +249,10 @@
             overflow: hidden;
         }
         #race-canvas {
-            max-width: 100%;
+            width: 100vw;
+            height: calc(100vw * 480 / 800);
             max-height: 100vh;
-            width: auto;
-            height: auto;
+            max-width: calc(100vh * 800 / 480);
             image-rendering: pixelated;
             image-rendering: crisp-edges;
             object-fit: contain;
@@ -392,7 +392,7 @@
             justify-content: center;
             font-size: 11px;
             font-weight: bold;
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P', 'DungGeunMo', monospace;
             color: var(--white);
             transition: all 0.2s;
         }
@@ -420,7 +420,7 @@
             align-items: center;
             justify-content: center;
             font-size: 11px;
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P', 'DungGeunMo', monospace;
             color: var(--white);
             transition: all 0.2s;
         }

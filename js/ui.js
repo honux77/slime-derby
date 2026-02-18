@@ -5,8 +5,6 @@
 // UI state variables
 let countRepeatTimer = null;
 let countRepeatInterval = null;
-let raceCountRepeatTimer = null;
-let raceCountRepeatInterval = null;
 let timeRepeatTimer = null;
 let timeRepeatInterval = null;
 
@@ -42,11 +40,9 @@ function showSetup() {
 function updateDrawNotice() {
     const notice = document.getElementById('draw-notice');
     const noticeText = document.getElementById('draw-notice-text');
-    if (playerCount > racePlayerCount) {
+    if (playerCount > 15) {
         notice.style.display = 'flex';
-        if (noticeText) {
-            noticeText.textContent = t('drawNotice');
-        }
+        if (noticeText) noticeText.textContent = t('drawNotice');
     } else {
         notice.style.display = 'none';
     }
@@ -54,12 +50,8 @@ function updateDrawNotice() {
 
 // Player count controls
 function changeCount(d) {
-    playerCount = Math.max(2, Math.min(1000, playerCount + d));
+    playerCount = Math.max(2, Math.min(999, playerCount + d));
     document.getElementById('player-count').value = playerCount;
-    if (racePlayerCount > playerCount) {
-        racePlayerCount = playerCount;
-        document.getElementById('race-count').value = racePlayerCount;
-    }
     updateDrawNotice();
     buildPlayerInputs();
     saveSetup();
@@ -87,10 +79,6 @@ function stopCountRepeat() {
 function setCountMin() {
     playerCount = 2;
     document.getElementById('player-count').value = playerCount;
-    if (racePlayerCount > playerCount) {
-        racePlayerCount = playerCount;
-        document.getElementById('race-count').value = racePlayerCount;
-    }
     updateDrawNotice();
     buildPlayerInputs();
     saveSetup();
@@ -98,7 +86,7 @@ function setCountMin() {
 }
 
 function setCountMax() {
-    playerCount = 1000;
+    playerCount = 999;
     document.getElementById('player-count').value = playerCount;
     updateDrawNotice();
     buildPlayerInputs();
@@ -108,64 +96,9 @@ function setCountMax() {
 
 function setCount(val) {
     const n = parseInt(val);
-    if (!isNaN(n)) playerCount = Math.max(2, Math.min(1000, n));
-    if (racePlayerCount > playerCount) {
-        racePlayerCount = playerCount;
-        document.getElementById('race-count').value = racePlayerCount;
-    }
+    if (!isNaN(n)) playerCount = Math.max(2, Math.min(999, n));
     updateDrawNotice();
     buildPlayerInputs();
-    saveSetup();
-}
-
-// Race count controls
-function changeRaceCount(d) {
-    racePlayerCount = Math.max(2, Math.min(15, Math.min(playerCount, racePlayerCount + d)));
-    document.getElementById('race-count').value = racePlayerCount;
-    updateDrawNotice();
-    saveSetup();
-    sfxTick();
-}
-
-function startRaceCountRepeat(d) {
-    changeRaceCount(d);
-    raceCountRepeatTimer = setTimeout(() => {
-        raceCountRepeatInterval = setInterval(() => changeRaceCount(d), 50);
-    }, 500);
-}
-
-function stopRaceCountRepeat() {
-    if (raceCountRepeatTimer) {
-        clearTimeout(raceCountRepeatTimer);
-        raceCountRepeatTimer = null;
-    }
-    if (raceCountRepeatInterval) {
-        clearInterval(raceCountRepeatInterval);
-        raceCountRepeatInterval = null;
-    }
-}
-
-function setRaceCountMin() {
-    racePlayerCount = 2;
-    document.getElementById('race-count').value = racePlayerCount;
-    updateDrawNotice();
-    saveSetup();
-    sfxTick();
-}
-
-function setRaceCountMax() {
-    racePlayerCount = Math.min(15, playerCount);
-    document.getElementById('race-count').value = racePlayerCount;
-    updateDrawNotice();
-    saveSetup();
-    sfxTick();
-}
-
-function setRaceCount(val) {
-    const n = parseInt(val);
-    if (!isNaN(n)) racePlayerCount = Math.max(2, Math.min(15, Math.min(playerCount, n)));
-    document.getElementById('race-count').value = racePlayerCount;
-    updateDrawNotice();
     saveSetup();
 }
 
@@ -256,21 +189,14 @@ function buildPlayerInputs() {
 function showDraw(picked) {
     state = 'draw';
     showScreen('select-screen');
-    
-    // Update with translations
+
     const drawTitle = document.getElementById('draw-title');
     const drawSubtitle = document.getElementById('draw-subtitle');
     const drawStartBtn = document.getElementById('draw-start-btn');
-    const drawTotal = document.getElementById('draw-total');
-    const drawSelected = document.getElementById('draw-selected');
-    
+
     if (drawTitle) drawTitle.textContent = t('drawTitle');
     if (drawStartBtn) drawStartBtn.textContent = t('startRace');
-    
-    if (drawTotal) drawTotal.textContent = playerCount;
-    if (drawSelected) drawSelected.textContent = racePlayerCount;
-    
-    // Update subtitle with player counts
+
     if (drawSubtitle) {
         const subtitleText = t('drawSubtitle')
             .replace('{total}', playerCount)
@@ -282,7 +208,7 @@ function showDraw(picked) {
             return num;
         });
     }
-    
+
     const grid = document.getElementById('draw-grid');
     grid.innerHTML = '';
     for (let i = 0; i < picked.length && i < racePlayerCount; i++) {
@@ -367,12 +293,12 @@ function downloadResults() {
     
     let yPos = 40;
     
-    dctx.font = 'bold 32px "Press Start 2P", monospace';
+    dctx.font = 'bold 32px "Press Start 2P", "DungGeunMo", monospace';
     dctx.textAlign = 'center';
     dctx.fillStyle = '#ffd700';
     dctx.fillText('SLIME DERBY', W/2, yPos);
     dctx.fillStyle = '#58d854';
-    dctx.font = 'bold 24px "Press Start 2P", monospace';
+    dctx.font = 'bold 24px "Press Start 2P", "DungGeunMo", monospace';
     dctx.fillText('FINISH!', W/2, yPos + 45);
     
     yPos += 90;
@@ -391,7 +317,7 @@ function downloadResults() {
         yPos += snapH + 40;
     }
     
-    dctx.font = 'bold 20px "Press Start 2P", monospace';
+    dctx.font = 'bold 20px "Press Start 2P", "DungGeunMo", monospace';
     dctx.fillStyle = '#fff';
     dctx.textAlign = 'left';
     dctx.fillText('RESULTS', 50, yPos);
@@ -420,7 +346,7 @@ function downloadResults() {
             dctx.strokeRect(x, yPos, W - 100, rowH);
         }
         
-        dctx.font = 'bold 16px "Press Start 2P", monospace';
+        dctx.font = 'bold 16px "Press Start 2P", "DungGeunMo", monospace';
         dctx.fillStyle = rankColors[i];
         dctx.textAlign = 'left';
         dctx.fillText(ranks[i], x + 15, yPos + 30);
@@ -430,7 +356,7 @@ function downloadResults() {
         dctx.arc(x + 110, yPos + 25, 10, 0, Math.PI * 2);
         dctx.fill();
         
-        dctx.font = 'bold 14px "Press Start 2P", monospace';
+        dctx.font = 'bold 14px "Press Start 2P", "DungGeunMo", monospace';
         dctx.fillStyle = '#fff';
         dctx.fillText(p.name, x + 135, yPos + 30);
         
@@ -439,12 +365,12 @@ function downloadResults() {
         if (p.tripCount > 0) stats.push(`💥${p.tripCount}`);
         if (p.sleepCount > 0) stats.push(`💤${p.sleepCount}`);
         if (stats.length > 0) {
-            dctx.font = '12px "Press Start 2P", monospace';
+            dctx.font = '12px "Press Start 2P", "DungGeunMo", monospace';
             dctx.fillStyle = '#888';
             dctx.fillText(stats.join(' '), x + 320, yPos + 30);
         }
         
-        dctx.font = 'bold 14px "Press Start 2P", monospace';
+        dctx.font = 'bold 14px "Press Start 2P", "DungGeunMo", monospace';
         dctx.fillStyle = p.dnf ? '#ff6666' : '#aaa';
         dctx.textAlign = 'right';
         dctx.fillText(p.dnf ? 'DNF' : p.finishTime.toFixed(2) + 's', W - 65, yPos + 30);
@@ -470,7 +396,6 @@ function saveSetup() {
     });
     const data = {
         count: playerCount,
-        raceCount: racePlayerCount,
         useNames: document.getElementById('use-names').checked,
         useNESChars: document.getElementById('use-nes-chars').checked,
         earlyFinish: document.getElementById('early-finish').checked,
@@ -486,12 +411,8 @@ function loadSetup() {
         if (!raw) { buildPlayerInputs(); return; }
         const d = JSON.parse(raw);
         if (d.count != null) {
-            playerCount = Math.max(2, Math.min(1000, d.count));
+            playerCount = Math.max(2, Math.min(999, d.count));
             document.getElementById('player-count').value = playerCount;
-        }
-        if (d.raceCount != null) {
-            racePlayerCount = Math.max(2, Math.min(15, Math.min(playerCount, d.raceCount)));
-            document.getElementById('race-count').value = racePlayerCount;
         }
         if (d.useNames) {
             document.getElementById('use-names').checked = true;
@@ -519,9 +440,7 @@ function loadSetup() {
 function resetSetup() {
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
     playerCount = 45;
-    racePlayerCount = 6;
     document.getElementById('player-count').value = 45;
-    document.getElementById('race-count').value = 6;
     document.getElementById('use-names').checked = false;
     document.getElementById('use-nes-chars').checked = false;
     document.getElementById('early-finish').checked = true;
@@ -630,10 +549,7 @@ function toggleLanguage() {
     }
 
     // Update draw notice
-    const drawNoticeText = document.getElementById('draw-notice-text');
-    if (drawNoticeText) {
-        drawNoticeText.textContent = t('drawNotice');
-    }
+    updateDrawNotice();
 
     // Update result screen text
     updateResultLabels();
@@ -646,14 +562,11 @@ function updateSetupLabels() {
     const elements = {
         'setup-title': 'setupTitle',
         'label-total-players': 'totalPlayers',
-        'label-racing-players': 'racingPlayers',
         'label-race-time': 'raceTime',
         'label-use-names': 'useNames',
         'label-early-finish': 'earlyFinishMode',
         'btn-min-1': 'min',
         'btn-max-1': 'max',
-        'btn-min-2': 'min',
-        'btn-max-2': 'max',
         'btn-min-3': 'min',
         'btn-max-3': 'max',
         'btn-reset': 'reset',

@@ -61,7 +61,7 @@ const CROWD_Y = CH - CROWD_H;
 
 // ── Global State ──
 let playerCount = 45;
-let racePlayerCount = 6;
+let racePlayerCount = 15;
 let players = [];
 let targetTime = 10;
 let state = 'title';
