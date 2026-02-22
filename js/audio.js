@@ -23,6 +23,7 @@ function initMusic() {
 
 // Play background music
 function playBgMusic() {
+    if (muteAudio) return;
     initMusic();
     stopAllMusic();
     bgMusic.currentTime = 0;
@@ -31,6 +32,7 @@ function playBgMusic() {
 
 // Play victory music
 function playVictoryMusic() {
+    if (muteAudio) return;
     initMusic();
     stopAllMusic();
     victoryMusic.currentTime = 0;
@@ -45,6 +47,7 @@ function stopAllMusic() {
 
 // Generate tone with Web Audio API
 function tone(freq, dur, type='square', vol=0.06) {
+    if (muteAudio) return;
     try {
         if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
         const o = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -64,7 +67,8 @@ function sfxFanfare() {
     tone(523,.12); setTimeout(()=>tone(659,.12),120);
     setTimeout(()=>tone(784,.12),240); setTimeout(()=>tone(1047,.35),380);
 }
-function sfxBoost() { 
+function sfxBoost() {
+    if (muteAudio) return;
     try {
         if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
         const o = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -80,6 +84,7 @@ function sfxBoost() {
 function sfxTrip() { tone(300,.08); setTimeout(()=>tone(180,.15,'sawtooth'),80); }
 function sfxSleep() { tone(220,.2,'sine',0.04); }
 function sfxAwakening() {
+    if (muteAudio) return;
     try {
         if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
         const now = audioCtx.currentTime;

@@ -99,6 +99,14 @@
                 <span id="label-early-finish"></span>
             </label>
         </div>
+        <div class="setup-row">
+            <span class="setup-label"></span>
+            <label class="sd-checkbox">
+                <input type="checkbox" id="mute-audio" onchange="toggleMuteAudio();saveSetup()">
+                <span class="sd-check-box"></span>
+                <span id="label-mute-audio"></span>
+            </label>
+        </div>
         <div class="player-list" id="player-list"></div>
         <div class="setup-row">
             <span class="setup-label" id="label-race-time"></span>
@@ -149,6 +157,7 @@
         </div>
         <div class="btn-group">
             <button class="btn" onclick="downloadResults()" id="result-download-btn"><span class="btn-full">📥</span><span class="btn-mobile">📥</span></button>
+            <button class="btn" onclick="downloadCSV()" id="result-csv-btn"><span class="btn-full">📊</span><span class="btn-mobile">📊</span></button>
             <button class="btn" onclick="showSetup()" id="result-setup-btn"></button>
             <button class="btn primary" onclick="startRace()" id="result-rematch-btn"></button>
         </div>

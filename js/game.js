@@ -52,6 +52,7 @@ function startRace() {
     }
 
     if (playerCount === racePlayerCount) {
+        nonRacingPlayers = [];
         players = [];
         for (let i = 0; i < playerCount; i++) {
             const name = nameMap[i] || `#${i + 1}`;
@@ -60,6 +61,14 @@ function startRace() {
         beginRace();
     } else {
         const picked = pickRandom(playerCount, racePlayerCount);
+        const pickedSet = new Set(picked);
+        nonRacingPlayers = [];
+        for (let i = 1; i <= playerCount; i++) {
+            if (!pickedSet.has(i)) {
+                const name = nameMap[i - 1] || `#${i}`;
+                nonRacingPlayers.push({ name, color: SLIME_COLORS[(i - 1) % SLIME_COLORS.length] });
+            }
+        }
         players = [];
         for (let i = 0; i < racePlayerCount; i++) {
             const num = picked[i];

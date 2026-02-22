@@ -38,11 +38,11 @@ const TRANSLATIONS = {
         finish: '결승선',
         
         // Effects
-        boost: 'BOOST!',
-        trip: 'TRIP!',
-        sleep: 'Zzz..',
-        awakening: 'AWAKENING!',
-        
+        boost: '부스트!',
+        trip: '꽈당!',
+        sleep: '쿨쿨!',
+        awakening: '각성!',
+
         // Results
         resultsTitle: '경주 결과',
         rank: '순위',
@@ -52,7 +52,10 @@ const TRANSLATIONS = {
         boosts: '부스트',
         trips: '꽈당',
         sleeps: '졸음',
-        downloadImage: '결과 다운로드',
+        dnf: '미완주',
+        dns: '미출전',
+        downloadImage: '이미지 다운로드',
+        downloadCSV: 'CSV 다운로드',
         newRace: '새 경주',
         backToSetup: '설정으로',
         
@@ -172,6 +175,7 @@ const TRANSLATIONS = {
         playerPlaceholder: '참가자',
         enjoyedGame: '재밌으셨나요?',
         buyCoffee: '☕ 커피 한 잔 사주기!',
+        muteAudio: '무음 모드',
 
         // NES Character Names
         nesName1: '마리오',
@@ -246,7 +250,10 @@ const TRANSLATIONS = {
         boosts: 'Boosts',
         trips: 'Trips',
         sleeps: 'Sleeps',
-        downloadImage: 'Download Result',
+        dnf: 'DNF',
+        dns: 'DNS',
+        downloadImage: 'Image',
+        downloadCSV: 'CSV',
         newRace: 'New Race',
         backToSetup: 'Setup',
         
@@ -366,6 +373,7 @@ const TRANSLATIONS = {
         playerPlaceholder: 'Player',
         enjoyedGame: 'Enjoyed the game?',
         buyCoffee: '☕ Buy me a coffee!',
+        muteAudio: 'Mute',
 
         // NES Character Names
         nesName1: 'Mario',

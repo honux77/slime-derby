@@ -252,137 +252,229 @@ function showResults() {
 
     const box = document.getElementById('results-list');
     box.innerHTML = '';
-    const ranks = ['1ST','2ND','3RD','4TH','5TH','6TH','7TH','8TH'];
-    const rcls = ['g','s','b','','','','',''];
+    const rcls = ['g','s','b','','','','','','','','','','','',''];
 
-    const displayCount = Math.min(finishOrder.length, 8);
-    for (let i = 0; i < displayCount; i++) {
+    for (let i = 0; i < finishOrder.length; i++) {
         const p = finishOrder[i];
         const row = document.createElement('div');
         row.className = 'res-row' + (i===0?' w':'');
-        
+
         const stats = [];
         if (p.boostCount > 0) stats.push(`🚀${p.boostCount}`);
         if (p.tripCount > 0) stats.push(`💥${p.tripCount}`);
         if (p.sleepCount > 0) stats.push(`💤${p.sleepCount}`);
-        const statsHtml = stats.length > 0 
-            ? `<div class="res-stats">${stats.map(s => `<span>${s}</span>`).join('')}</div>` 
+        const statsHtml = stats.length > 0
+            ? `<div class="res-stats">${stats.map(s => `<span>${s}</span>`).join('')}</div>`
             : '';
-        
-        const timeText = p.dnf ? 'DNF' : `${p.finishTime.toFixed(2)}s`;
+
+        const timeText = p.dnf ? t('dnf') : `${p.finishTime.toFixed(2)}s`;
         row.innerHTML = `
-            <span class="res-rank ${rcls[i]}">${ranks[i]}</span>
+            <span class="res-rank ${rcls[i]}">${rankLabel(i + 1)}</span>
             <div class="res-dot" style="background:${p.color.hex}"></div>
             <span class="res-name">${p.name}</span>
             ${statsHtml}
             <span class="res-time">${timeText}</span>`;
         box.appendChild(row);
     }
+
+    if (nonRacingPlayers && nonRacingPlayers.length > 0) {
+        const dnsStart = finishOrder.length + 1;
+        nonRacingPlayers.forEach((p, i) => {
+            const row = document.createElement('div');
+            row.className = 'res-row dns';
+            row.innerHTML = `
+                <span class="res-rank">${rankLabel(dnsStart + i)}</span>
+                <div class="res-dot" style="background:${p.color.hex}"></div>
+                <span class="res-name">${p.name}</span>
+                <span class="res-time">${t('dns')}</span>`;
+            box.appendChild(row);
+        });
+    }
 }
 
-// Download results as image
+function rankLabel(n) {
+    if (currentLang === 'ko') return n + '등';
+    if (n >= 11 && n <= 13) return n + 'TH';
+    const r = n % 10;
+    if (r === 1) return n + 'ST';
+    if (r === 2) return n + 'ND';
+    if (r === 3) return n + 'RD';
+    return n + 'TH';
+}
+
+// Download results as image (up to 45 entries: racers + DNS)
 function downloadResults() {
+    const MAX_ROWS = 45;
+    const ROW_H = 50;
+    const ROW_GAP = 8;
+
+    // Build combined entry list (racers first, then DNS), capped at 45
+    const allEntries = [];
+    for (let i = 0; i < finishOrder.length && allEntries.length < MAX_ROWS; i++) {
+        allEntries.push({ type: 'race', p: finishOrder[i], rankNum: i + 1 });
+    }
+    if (nonRacingPlayers) {
+        const dnsStart = finishOrder.length + 1;
+        for (let i = 0; i < nonRacingPlayers.length && allEntries.length < MAX_ROWS; i++) {
+            allEntries.push({ type: 'dns', p: nonRacingPlayers[i], rankNum: dnsStart + i });
+        }
+    }
+    const hiddenCount = Math.max(0,
+        finishOrder.length + (nonRacingPlayers ? nonRacingPlayers.length : 0) - allEntries.length);
+
+    const W = 800;
+    const snapDisplayH = finishSnapshot ? 460 : 0;
+    const footerH = hiddenCount > 0 ? 40 : 0;
+    const H = 90 + snapDisplayH + 35 + allEntries.length * (ROW_H + ROW_GAP) + footerH + 30;
+
     const downloadCanvas = document.createElement('canvas');
     const dctx = downloadCanvas.getContext('2d');
-    const W = 800, H = 1000;
     downloadCanvas.width = W;
     downloadCanvas.height = H;
-    
+
     dctx.fillStyle = '#0a0a1a';
     dctx.fillRect(0, 0, W, H);
-    
+
     let yPos = 40;
-    
+
+    // Title
     dctx.font = 'bold 32px "Press Start 2P", "DungGeunMo", monospace';
     dctx.textAlign = 'center';
     dctx.fillStyle = '#ffd700';
-    dctx.fillText('SLIME DERBY', W/2, yPos);
+    dctx.fillText('SLIME DERBY', W / 2, yPos);
     dctx.fillStyle = '#58d854';
     dctx.font = 'bold 24px "Press Start 2P", "DungGeunMo", monospace';
-    dctx.fillText('FINISH!', W/2, yPos + 45);
-    
+    dctx.fillText('FINISH!', W / 2, yPos + 45);
     yPos += 90;
-    
+
+    // Snapshot
     if (finishSnapshot) {
         const img = new Image();
         img.src = finishSnapshot;
         const snapW = 700, snapH = 420;
         const snapX = (W - snapW) / 2;
         dctx.drawImage(img, snapX, yPos, snapW, snapH);
-        
         dctx.strokeStyle = '#ffd700';
         dctx.lineWidth = 4;
         dctx.strokeRect(snapX, yPos, snapW, snapH);
-        
         yPos += snapH + 40;
     }
-    
+
+    // Section header
     dctx.font = 'bold 20px "Press Start 2P", "DungGeunMo", monospace';
     dctx.fillStyle = '#fff';
     dctx.textAlign = 'left';
     dctx.fillText('RESULTS', 50, yPos);
     yPos += 35;
-    
-    const ranks = ['1ST','2ND','3RD','4TH','5TH','6TH','7TH','8TH'];
-    const rankColors = ['#ffd700','#c0c0c0','#cd7f32','#fff','#fff','#fff','#fff','#fff'];
-    
-    const displayCount = Math.min(finishOrder.length, 8);
-    for (let i = 0; i < displayCount; i++) {
-        const p = finishOrder[i];
-        const rowH = 50;
-        const x = 50;
-        
-        if (i === 0) {
+
+    // Rows
+    const x = 50;
+    const rankColorMap = { 1: '#ffd700', 2: '#c0c0c0', 3: '#cd7f32' };
+
+    for (const entry of allEntries) {
+        const { type, p, rankNum } = entry;
+        const isDns = type === 'dns';
+
+        dctx.globalAlpha = isDns ? 0.45 : 1;
+
+        if (rankNum === 1) {
             dctx.fillStyle = 'rgba(255,215,0,0.1)';
-            dctx.fillRect(x, yPos, W - 100, rowH);
+            dctx.fillRect(x, yPos, W - 100, ROW_H);
             dctx.strokeStyle = '#ffd700';
             dctx.lineWidth = 2;
-            dctx.strokeRect(x, yPos, W - 100, rowH);
+            dctx.strokeRect(x, yPos, W - 100, ROW_H);
         } else {
-            dctx.fillStyle = '#1a1a3a';
-            dctx.fillRect(x, yPos, W - 100, rowH);
+            dctx.fillStyle = isDns ? '#111122' : '#1a1a3a';
+            dctx.fillRect(x, yPos, W - 100, ROW_H);
             dctx.strokeStyle = '#2a2a4a';
             dctx.lineWidth = 1;
-            dctx.strokeRect(x, yPos, W - 100, rowH);
+            dctx.strokeRect(x, yPos, W - 100, ROW_H);
         }
-        
+
+        // Rank label
         dctx.font = 'bold 16px "Press Start 2P", "DungGeunMo", monospace';
-        dctx.fillStyle = rankColors[i];
+        dctx.fillStyle = isDns ? '#555' : (rankColorMap[rankNum] || '#fff');
         dctx.textAlign = 'left';
-        dctx.fillText(ranks[i], x + 15, yPos + 30);
-        
+        dctx.fillText(rankLabel(rankNum), x + 15, yPos + 30);
+
+        // Color dot
         dctx.fillStyle = p.color.hex;
         dctx.beginPath();
-        dctx.arc(x + 110, yPos + 25, 10, 0, Math.PI * 2);
+        dctx.arc(x + 115, yPos + 25, 10, 0, Math.PI * 2);
         dctx.fill();
-        
+
+        // Name
         dctx.font = 'bold 14px "Press Start 2P", "DungGeunMo", monospace';
-        dctx.fillStyle = '#fff';
-        dctx.fillText(p.name, x + 135, yPos + 30);
-        
-        const stats = [];
-        if (p.boostCount > 0) stats.push(`🚀${p.boostCount}`);
-        if (p.tripCount > 0) stats.push(`💥${p.tripCount}`);
-        if (p.sleepCount > 0) stats.push(`💤${p.sleepCount}`);
-        if (stats.length > 0) {
-            dctx.font = '12px "Press Start 2P", "DungGeunMo", monospace';
-            dctx.fillStyle = '#888';
-            dctx.fillText(stats.join(' '), x + 320, yPos + 30);
+        dctx.fillStyle = isDns ? '#888' : '#fff';
+        dctx.textAlign = 'left';
+        dctx.fillText(p.name, x + 140, yPos + 30);
+
+        // Stats (racers only)
+        if (!isDns) {
+            const stats = [];
+            if (p.boostCount > 0) stats.push(`🚀${p.boostCount}`);
+            if (p.tripCount > 0) stats.push(`💥${p.tripCount}`);
+            if (p.sleepCount > 0) stats.push(`💤${p.sleepCount}`);
+            if (stats.length > 0) {
+                dctx.font = '12px "Press Start 2P", "DungGeunMo", monospace';
+                dctx.fillStyle = '#888';
+                dctx.fillText(stats.join(' '), x + 320, yPos + 30);
+            }
         }
-        
+
+        // Time / DNS
         dctx.font = 'bold 14px "Press Start 2P", "DungGeunMo", monospace';
-        dctx.fillStyle = p.dnf ? '#ff6666' : '#aaa';
         dctx.textAlign = 'right';
-        dctx.fillText(p.dnf ? 'DNF' : p.finishTime.toFixed(2) + 's', W - 65, yPos + 30);
-        
-        yPos += rowH + 10;
+        if (isDns) {
+            dctx.fillStyle = '#555';
+            dctx.fillText(t('dns'), W - 65, yPos + 30);
+        } else {
+            dctx.fillStyle = p.dnf ? '#ff6666' : '#aaa';
+            dctx.fillText(p.dnf ? t('dnf') : p.finishTime.toFixed(2) + 's', W - 65, yPos + 30);
+        }
+
+        dctx.globalAlpha = 1;
+        yPos += ROW_H + ROW_GAP;
     }
-    
+
+    // Footer: hidden count note
+    if (hiddenCount > 0) {
+        dctx.font = '11px "Press Start 2P", "DungGeunMo", monospace';
+        dctx.fillStyle = '#444';
+        dctx.textAlign = 'center';
+        dctx.fillText(`+ ${hiddenCount} more  →  CSV download for full list`, W / 2, yPos + 20);
+    }
+
     const link = document.createElement('a');
-    const timestamp = new Date().toISOString().slice(0,19).replace(/:/g,'-');
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
     link.download = `slime-derby-${timestamp}.png`;
     link.href = downloadCanvas.toDataURL('image/png');
     link.click();
+}
+
+// Download full ranking as CSV
+function downloadCSV() {
+    const rows = ['Rank,Name,Time,Boosts,Trips,Sleeps'];
+    finishOrder.forEach((p, i) => {
+        const time = p.dnf ? 'DNF' : p.finishTime.toFixed(2) + 's';
+        const name = `"${p.name.replace(/"/g, '""')}"`;
+        rows.push(`${i + 1},${name},${time},${p.boostCount},${p.tripCount},${p.sleepCount}`);
+    });
+    if (nonRacingPlayers) {
+        const dnsStart = finishOrder.length + 1;
+        nonRacingPlayers.forEach((p, i) => {
+            const name = `"${p.name.replace(/"/g, '""')}"`;
+            rows.push(`${dnsStart + i},${name},DNS,0,0,0`);
+        });
+    }
+    // BOM for Excel UTF-8
+    const blob = new Blob(['\ufeff' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const link = document.createElement('a');
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    link.download = `slime-derby-${timestamp}.csv`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
 }
 
 // LocalStorage management
@@ -399,6 +491,7 @@ function saveSetup() {
         useNames: document.getElementById('use-names').checked,
         useNESChars: document.getElementById('use-nes-chars').checked,
         earlyFinish: document.getElementById('early-finish').checked,
+        mute: document.getElementById('mute-audio').checked,
         names,
         time: parseInt(document.getElementById('time-input').value) || 10,
     };
@@ -423,6 +516,10 @@ function loadSetup() {
         if (d.earlyFinish !== undefined) {
             document.getElementById('early-finish').checked = d.earlyFinish;
         }
+        if (d.mute !== undefined) {
+            document.getElementById('mute-audio').checked = d.mute;
+            muteAudio = d.mute;
+        }
         if (d.time != null) {
             document.getElementById('time-input').value = Math.max(3, Math.min(60, d.time));
         }
@@ -437,6 +534,11 @@ function loadSetup() {
     } catch(e) {}
 }
 
+function toggleMuteAudio() {
+    muteAudio = document.getElementById('mute-audio').checked;
+    if (muteAudio) stopAllMusic();
+}
+
 function resetSetup() {
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
     playerCount = 45;
@@ -444,6 +546,8 @@ function resetSetup() {
     document.getElementById('use-names').checked = false;
     document.getElementById('use-nes-chars').checked = false;
     document.getElementById('early-finish').checked = true;
+    document.getElementById('mute-audio').checked = false;
+    muteAudio = false;
     document.getElementById('time-input').value = 10;
     updateDrawNotice();
     buildPlayerInputs();
@@ -565,6 +669,7 @@ function updateSetupLabels() {
         'label-race-time': 'raceTime',
         'label-use-names': 'useNames',
         'label-early-finish': 'earlyFinishMode',
+        'label-mute-audio': 'muteAudio',
         'btn-min-1': 'min',
         'btn-max-1': 'max',
         'btn-min-3': 'min',
@@ -588,6 +693,11 @@ function updateResultLabels() {
     if (downloadBtn) {
         downloadBtn.querySelector('.btn-full').textContent = '📥 ' + t('downloadImage');
         downloadBtn.querySelector('.btn-mobile').textContent = '📥';
+    }
+    const csvBtn = document.getElementById('result-csv-btn');
+    if (csvBtn) {
+        csvBtn.querySelector('.btn-full').textContent = '📊 ' + t('downloadCSV');
+        csvBtn.querySelector('.btn-mobile').textContent = '📊';
     }
     const setupBtn = document.getElementById('result-setup-btn');
     if (setupBtn) setupBtn.textContent = t('backToSetup');

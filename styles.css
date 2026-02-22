@@ -285,14 +285,19 @@
         }
         .results-list {
             width: 100%; max-width: 520px;
+            max-height: 50vh; overflow-y: auto;
             display: flex; flex-direction: column; gap: 6px;
         }
+        .results-list::-webkit-scrollbar { width: 6px; }
+        .results-list::-webkit-scrollbar-track { background: var(--panel); }
+        .results-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
         .res-row {
             display: flex; align-items: center; gap: 10px;
             padding: 10px 14px; background: var(--panel);
             border: 2px solid var(--border); font-size: 10px;
         }
         .res-row.w { border-color: var(--yellow); background: rgba(255,215,0,0.06); }
+        .res-row.dns { opacity: 0.4; }
         .res-rank { min-width: 36px; font-weight: bold; }
         .res-rank.g { color: #ffd700; }
         .res-rank.s { color: #c0c0c0; }
