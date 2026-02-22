@@ -449,6 +449,14 @@
             }
         }
 
+        /* ===== Version Label ===== */
+        .version-label {
+            font-size: 9px;
+            color: #444;
+            letter-spacing: 1px;
+            margin-top: 12px;
+        }
+
         /* ===== Visitor Counter ===== */
         .visitor-counter {
             position: absolute;
