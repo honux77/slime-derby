@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>SLIME DERBY</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f0f23">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="SLIME DERBY 🎮" />
+    <meta property="og:description" content="귀여운 슬라임들의 레이싱 게임! 우승자는 과연 누구일까요? 🏆" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://honux77.github.io/slime-derby/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="SLIME DERBY - 슬라임 레이싱 게임" />
+    <meta name="description" content="귀여운 슬라임들의 레이싱 게임! 우승자는 과연 누구일까요? 🏆" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SLIME DERBY 🎮" />
+    <meta name="twitter:description" content="귀여운 슬라임들의 레이싱 게임! 우승자는 과연 누구일까요? 🏆" />
+    <meta name="twitter:image" content="https://honux77.github.io/slime-derby/og-image.png" />
+    
+    <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/dunggeunmo" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+</head>
+<body>
+<div id="app">
+    <!-- Fullscreen Toggle Button -->
+    <button id="fullscreen-btn" onclick="toggleFullscreen()" title="">Full</button>
+
+    <!-- Language Toggle Button -->
+    <button id="lang-btn" onclick="toggleLanguage()" title="">
+        <span id="lang-text">EN</span>
+    </button>
+
+    <!-- Title -->
+    <div id="title-screen" class="screen active">
+        <div class="title-slime-container">
+            <div class="title-slime"></div>
+            <div class="title-shadow"></div>
+        </div>
+        <h1>SLIME<br>DERBY</h1>
+        <p class="subtitle" id="subtitle-text"></p>
+        <button class="btn primary blink" onclick="showSetup()" id="start-btn"></button>
+        <div class="version-label">v0.5.1b</div>
+        <div class="visitor-counter">
+            <img src="https://hits.sh/honux77.github.io/slime-derby.svg?label=Visitors&color=58d854&labelColor=0a0a1a" alt="Visitor Counter">
+        </div>
+    </div>
+
+    <!-- Setup -->
+    <div id="setup-screen" class="screen">
+        <h2 id="setup-title"></h2>
+        <div class="setup-row">
+            <span class="setup-label" id="label-total-players"></span>
+            <div class="count-controls">
+                <button class="count-btn" onclick="setCountMin()" style="font-size:10px;width:auto;padding:0 8px;" id="btn-min-1">MIN</button>
+                <button class="count-btn" onmousedown="startCountRepeat(-1)" onmouseup="stopCountRepeat()" onmouseleave="stopCountRepeat()" ontouchstart="startCountRepeat(-1)" ontouchend="stopCountRepeat()" ontouchcancel="stopCountRepeat()">-</button>
+                <input type="number" id="player-count" value="6" min="2" max="999" oninput="setCount(this.value)">
+                <button class="count-btn" onmousedown="startCountRepeat(1)" onmouseup="stopCountRepeat()" onmouseleave="stopCountRepeat()" ontouchstart="startCountRepeat(1)" ontouchend="stopCountRepeat()" ontouchcancel="stopCountRepeat()">+</button>
+                <button class="count-btn" onclick="setCountMax()" style="font-size:10px;width:auto;padding:0 8px;" id="btn-max-1">MAX</button>
+            </div>
+        </div>
+        <div class="setup-row" id="draw-notice" style="display:none; margin-top:-8px; margin-bottom:4px;">
+            <span class="setup-label"></span>
+            <div style="font-size:9px; color:#ffdd00; line-height:1.5;" id="draw-notice-text"></div>
+        </div>
+        <div class="setup-row">
+            <span class="setup-label"></span>
+            <label class="sd-checkbox">
+                <input type="checkbox" id="use-names" onchange="buildPlayerInputs();saveSetup()">
+                <span class="sd-check-box"></span>
+                <span id="label-use-names"></span>
+            </label>
+        </div>
+        <div class="setup-row">
+            <span class="setup-label"></span>
+            <label class="sd-checkbox">
+                <input type="checkbox" id="use-nes-chars" onchange="saveSetup()">
+                <span class="sd-check-box"></span>
+                <span>NIN..DO</span>
+            </label>
+        </div>
+        <div class="setup-row">
+            <span class="setup-label"></span>
+            <label class="sd-checkbox">
+                <input type="checkbox" id="early-finish" checked onchange="saveSetup()">
+                <span class="sd-check-box"></span>
+                <span id="label-early-finish"></span>
+            </label>
+        </div>
+        <div class="setup-row">
+            <span class="setup-label"></span>
+            <label class="sd-checkbox">
+                <input type="checkbox" id="mute-audio" onchange="toggleMuteAudio();saveSetup()">
+                <span class="sd-check-box"></span>
+                <span id="label-mute-audio"></span>
+            </label>
+        </div>
+        <div class="player-list" id="player-list"></div>
+        <div class="setup-row">
+            <span class="setup-label" id="label-race-time"></span>
+            <div class="count-controls">
+                <button class="count-btn" onclick="setTimeMin()" style="font-size:10px;width:auto;padding:0 8px;" id="btn-min-3">MIN</button>
+                <button class="count-btn" onmousedown="startTimeRepeat(-1)" onmouseup="stopTimeRepeat()" onmouseleave="stopTimeRepeat()" ontouchstart="startTimeRepeat(-1)" ontouchend="stopTimeRepeat()" ontouchcancel="stopTimeRepeat()">-</button>
+                <input type="number" id="time-input" value="10" min="3" max="60" oninput="setTime(this.value)">
+                <button class="count-btn" onmousedown="startTimeRepeat(1)" onmouseup="stopTimeRepeat()" onmouseleave="stopTimeRepeat()" ontouchstart="startTimeRepeat(1)" ontouchend="stopTimeRepeat()" ontouchcancel="stopTimeRepeat()">+</button>
+                <button class="count-btn" onclick="setTimeMax()" style="font-size:10px;width:auto;padding:0 8px;" id="btn-max-3">MAX</button>
+                <span class="unit">SEC</span>
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:12px">
+            <button class="btn" onclick="resetSetup()" style="font-size:10px" id="btn-reset">RESET</button>
+            <button class="btn primary" onclick="startRace()" style="font-size:14px" id="btn-start-race">START RACE!</button>
+        </div>
+    </div>
+
+    <!-- Draw (selection) -->
+    <div id="select-screen" class="screen">
+        <h2 id="draw-title"></h2>
+        <p class="draw-sub" id="draw-subtitle"></p>
+        <div class="draw-grid" id="draw-grid"></div>
+        <button class="btn primary" onclick="beginRace()" style="margin-top:12px;font-size:14px" id="draw-start-btn"></button>
+    </div>
+
+    <!-- Game -->
+    <div id="game-screen" class="screen">
+        <canvas id="race-canvas"></canvas>
+    </div>
+
+    <!-- Results -->
+    <div id="result-screen" class="screen">
+        <h2 id="result-title"></h2>
+        <div id="finish-snapshot" style="margin-bottom: 16px;"></div>
+        <div class="results-list" id="results-list"></div>
+        <div style="margin: 12px 0; font-size: 10px; color: #888; line-height: 1.8;">
+            <span id="result-enjoy-text"></span>
+            <br>
+            <a id="result-coffee-link" href="https://buymeacoffee.com/honux77o" target="_blank" style="color: #FFDD00; text-decoration: none; font-weight: bold;"></a>
+            <br>
+            <a href="https://github.com/honux77/slime-derby" target="_blank" style="color: #58d854; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                GitHub Repo
+            </a>
+        </div>
+        <div class="btn-group">
+            <button class="btn" onclick="downloadResults()" id="result-download-btn"><span class="btn-full">📥</span><span class="btn-mobile">📥</span></button>
+            <button class="btn" onclick="downloadCSV()" id="result-csv-btn"><span class="btn-full">📊</span><span class="btn-mobile">📊</span></button>
+            <button class="btn" onclick="showSetup()" id="result-setup-btn"></button>
+            <button class="btn primary" onclick="startRace()" id="result-rematch-btn"></button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Scripts -->
+<script src="js/translations.js"></script>
+<script src="js/constants.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/rendering.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+
+</body>
+</html>
